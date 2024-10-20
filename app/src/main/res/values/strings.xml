@@ -430,4 +430,25 @@
         <item quantity="one">描述至少要 %d 个字.</item>
         <item quantity="other">描述至少要 %d 个字.</item>
     </plurals>
+
+    <!--    权限说明-->
+    <string name="desc_permission_access_wifi_state">允许应用访问 Wi-Fi 状态</string>
+    <string name="desc_permission_access_network_state">允许应用访问网络连接状态</string>
+    <string name="desc_permission_access_fine_location">允许应用获取精确位置</string>
+    <string name="desc_permission_access_coarse_location">允许应用获取大致位置</string>
+    <string name="desc_permission_schedule_exact_alarm">允许应用计划精确的闹钟</string>
+    <string name="desc_permission_query_all_packages">允许应用查询设备上的所有应用</string>
+    <string name="desc_permission_write_external_storage">允许应用写入外部存储</string>
+    <string name="desc_permission_manage_external_storage">允许应用管理外部存储的所有文件</string>
+    <string name="desc_permission_read_external_storage">允许应用读取外部存储</string>
+    <string name="desc_permission_internet">允许应用访问互联网</string>
+    <string name="desc_permission_system_alert_window">允许程序显示在其他所有程序的顶层</string>
+    <string name="desc_permission_request_ignore_battery_optimizations">允许应用请求忽略电池优化</string>
+    <string name="desc_permission_receive_boot_completed">允许应用在设备启动时接收广播</string>
+    <string name="desc_permission_foreground_service">允许应用使用前台服务</string>
+    <string name="desc_permission_record_audio">允许应用录制音频</string>
+    <string name="desc_permission_read_phone_state">允许应用访问电话状态</string>
+    <string name="desc_permission_install_shortcut">允许应用安装快捷方式</string>
+    <string name="desc_permission_uninstall_shortcut">允许应用卸载快捷方式</string>
+
 </resources>

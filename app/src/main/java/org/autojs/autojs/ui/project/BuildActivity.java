@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.project;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -40,7 +41,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -111,7 +112,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @ViewById(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private final List<Option> options = new ArrayList<>();
+    private final List<PermissionOption> options = new ArrayList<>();
 
     private ProjectConfig mProjectConfig;
     private MaterialDialog mProgressDialog;
@@ -140,32 +141,34 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
      */
     private void preparePermissionView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // Populate the options list
-        List<String> permissions = Arrays.asList(
-                "android.permission.ACCESS_WIFI_STATE",
-                "android.permission.ACCESS_NETWORK_STATE",
-                "android.permission.ACCESS_FINE_LOCATION",
-                "android.permission.ACCESS_COARSE_LOCATION",
-                "android.permission.SCHEDULE_EXACT_ALARM",
-                "android.permission.QUERY_ALL_PACKAGES",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.MANAGE_EXTERNAL_STORAGE",
-                "android.permission.READ_EXTERNAL_STORAGE",
-                "android.permission.INTERNET",
-                "android.permission.SYSTEM_ALERT_WINDOW",
-                "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-                "android.permission.RECEIVE_BOOT_COMPLETED",
-                "android.permission.FOREGROUND_SERVICE",
-                "android.permission.RECORD_AUDIO",
-                "android.permission.READ_PHONE_STATE",
-                "com.android.launcher.permission.INSTALL_SHORTCUT",
-                "com.android.launcher.permission.UNINSTALL_SHORTCUT"
-        );
-        Collections.sort(permissions);
-        for (String permission : permissions) {
-            options.add(new Option(permission, false));
+        // 权限及说明
+        String[][] permissions = {
+                {"android.permission.ACCESS_WIFI_STATE", getString(R.string.desc_permission_access_wifi_state)},
+                {"android.permission.ACCESS_NETWORK_STATE", getString(R.string.desc_permission_access_network_state)},
+                {"android.permission.ACCESS_FINE_LOCATION", getString(R.string.desc_permission_access_fine_location)},
+                {"android.permission.ACCESS_COARSE_LOCATION", getString(R.string.desc_permission_access_coarse_location)},
+                {"android.permission.SCHEDULE_EXACT_ALARM", getString(R.string.desc_permission_schedule_exact_alarm)},
+                {"android.permission.QUERY_ALL_PACKAGES", getString(R.string.desc_permission_query_all_packages)},
+                {"android.permission.WRITE_EXTERNAL_STORAGE", getString(R.string.desc_permission_write_external_storage)},
+                {"android.permission.MANAGE_EXTERNAL_STORAGE", getString(R.string.desc_permission_manage_external_storage)},
+                {"android.permission.READ_EXTERNAL_STORAGE", getString(R.string.desc_permission_read_external_storage)},
+                {"android.permission.INTERNET", getString(R.string.desc_permission_internet)},
+                {"android.permission.SYSTEM_ALERT_WINDOW", getString(R.string.desc_permission_system_alert_window)},
+                {"android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", getString(R.string.desc_permission_request_ignore_battery_optimizations)},
+                {"android.permission.RECEIVE_BOOT_COMPLETED", getString(R.string.desc_permission_receive_boot_completed)},
+                {"android.permission.FOREGROUND_SERVICE", getString(R.string.desc_permission_foreground_service)},
+                {"android.permission.RECORD_AUDIO", getString(R.string.desc_permission_record_audio)},
+                {"android.permission.READ_PHONE_STATE", getString(R.string.desc_permission_read_phone_state)},
+                {"com.android.launcher.permission.INSTALL_SHORTCUT", getString(R.string.desc_permission_install_shortcut)},
+                {"com.android.launcher.permission.UNINSTALL_SHORTCUT", getString(R.string.desc_permission_uninstall_shortcut)}
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Arrays.sort(permissions, Comparator.comparing(a -> a[0]));
         }
-        OptionAdapter adapter = new OptionAdapter(options);
+        for (String[] permission : permissions) {
+            options.add(new PermissionOption(permission[0], permission[1],false));
+        }
+        PermissionOptionAdapter adapter = new PermissionOptionAdapter(options);
         recyclerView.setAdapter(adapter);
     }
 
@@ -351,9 +354,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         appConfig.setUseMlKitOcr(mUseMlKitOcr.isChecked());
         appConfig.setUseOnnx(mUseOnnx.isChecked());
         Set<String> enabledPermission = new HashSet<>();
-        for (Option option : options) {
+        for (PermissionOption option : options) {
             if (option.isSelected()) {
-                enabledPermission.add(option.getText());
+                enabledPermission.add(option.getPermission());
             }
         }
         appConfig.setEnabledPermission(enabledPermission);
