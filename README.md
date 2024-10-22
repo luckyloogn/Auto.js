@@ -88,3 +88,130 @@
 ## License
 基于[Mozilla Public License Version 2.0](https://github.com/TonyJiangWJ/Auto.js/blob/master/LICENSE.md)并附加以下条款：
 * **非商业性使用** — 不得将此项目及其衍生的项目的源代码和二进制产品用于任何商业和盈利用途
+
+## 编译
+
+### 下载依赖
+首次需要在**项目根目录**下运行以下命令下载依赖的包：
+- Windows PowerShell 或 Linux : 
+  ```
+  ./gradlew downloadAndExtractNcnnArchives 
+  ./gradlew downloadAndExtractArchives
+  ```
+- Windows CMD : 
+  ```
+  gradlew.bat downloadAndExtractNcnnArchives 
+  gradlew.bat downloadAndExtractArchives
+  ```
+需要从Github上下载，网络问题可能比较慢，可以自行下载依赖的zip包，再解压到对应的目录：
+- ncnn预编译包
+  - 下载地址：https://github.com/Tencent/ncnn/releases/download/20240410/ncnn-20240410-android-vulkan.zip
+  - 解压地址：`autojs-aar/yolov8ncnn/src/main/jni/`
+  - 解压后目录结构：
+    ```
+    autojs-aar
+    └── yolov8ncnn
+        └── src
+            └── main
+                └── jni
+                    └── ncnn-20240410-android-vulkan
+                        └── arm64-v8a
+                        └── armeabi-v7a
+                        └── x86
+                        └── x86_64
+    ```
+- OpenCV4.8.0 (需要解压到2个地方)
+  - 下载地址：https://github.com/opencv/opencv/releases/download/4.8.0/opencv-4.8.0-android-sdk.zip
+  - 解压地址1：`autojs-aar/yolov8ncnn/src/main/jni/`
+  - 解压后目录结构1：
+    ```
+    autojs-aar
+    └── yolov8ncnn
+        └── src
+            └── main
+                └── jni
+                    └── OpenCV-android-sdk
+                        └── samples
+                        └── sdk
+                        └── LICENSE
+                        └── README.android
+    ```
+  - 解压地址2：`autojs-aar/paddleocr/OpenCV/`
+  - 解压后目录结构2：
+    ```
+    autojs-aar
+    └── paddleocr
+        └── OpenCV
+            └── OpenCV-android-sdk
+                └── samples
+                └── sdk
+                └── LICENSE
+                └── README.android
+    ```
+
+### 设置签名文件
+1. 先使用 Android Studio 创建签名文件，具体看[**这个**](https://developer.android.com/studio/publish/app-signing?hl=zh-cn#generate-key)。
+注意: 密钥的密码 (Key / Password) 要与密钥库密码 (Password) 相同 ，
+而且 `Key store path` 设置为：
+   - Windows: `C:/Users/你的用户名/auto-js-t-pkcs12.jks`
+   - Linux: `/home/你的用户名/auto-js-t-pkcs12.jks`
+2. 设置环境变量 (以下二选一即可)：
+   - 临时环境变量 (只在当前终端会话有效，新开终端需要重新设置)：
+      - Windows: 
+        ```
+        set autojspasswd=创建签名文件时设置的Password
+        set autojsalias=创建签名文件时设置的Alias
+        ```
+      - Linux: 
+        ```
+        export autojspasswd=创建签名文件时设置的Password
+        export autojsalias=创建签名文件时设置的Alias
+        ```
+   - 永久有效的环境变量：
+      - Windows: 以**管理员身份**打开命令提示符 (cmd)，运行下面命令
+        ```
+        setx autojspasswd=创建签名文件时设置的Password
+        setx autojsalias=创建签名文件时设置的Alias
+        ```
+      - Linux: 将下列内容**添加**到 `~/.bashrc` 文件或 `.zshrc` 文件
+        ```
+        export autojspasswd=创建签名文件时设置的Password
+        export autojsalias=创建签名文件时设置的Alias
+        ```
+
+### 编译apk
+一些说明 (ChatGPT) : 
+> - Debug: 用于开发和调试，包含调试信息，便于开发者追踪和修复错误
+> - Release: 用于发布给用户，经过优化和混淆处理，目的是提高性能和安全性
+> ---
+> - arm64-v8a: 64 位 ARM 架构
+> - armeabi-v7a: 32 位 ARM 架构
+> - x86: 32 位 Intel x86 架构
+> - x86_64: 64 位 Intel x86 架构
+> - universal: 支持以上四种架构，安装包体积大
+
+#### 使用命令行编译
+在**项目根目录**下运行以下命令进行编译需要的版本 (Windows PowerShell 或 Linux 直接使用下面命令，若使用 Windows CMD 需要将 `./gradlew` 改为 `gradlew.bat` )
+- Debug 
+  - arm64-v8a: `./gradlew assembleArm64_v8aDebug`
+  - armeabi-v7a: `./gradlew assembleArmeabi_v7aDebug`
+  - x86: `./gradlew assembleX86Debug`
+  - x86_64: `./gradlew assembleX86_64Debug`
+  - universal: `./gradlew assembleUniversalDebug`
+- Release 
+  - arm64-v8a: `./gradlew assembleArm64_v8aRelease`
+  - armeabi-v7a: `./gradlew assembleArmeabi_v7aRelease`
+  - x86: `./gradlew assembleX86Release`
+  - x86_64: `./gradlew assembleX86_64Release`
+  - universal: `./gradlew assembleUniversalRelease`
+
+编译出来的apk会复制到 `common/debug` 或 `common/release` 下
+
+#### 使用 Android Studio 编译
+1. 在 Android Studio 左上角点击 **三横条** 呼出 **主菜单** 
+2. 鼠标移动到 **Build**
+3. 下拉菜单点 **Generate Signed Bundle / APK...**
+4. 弹出的会话框选 **APK** ，然后根据引导进行操作即可
+生成的文件
+
+编译出来的apk也会复制到 `common/debug` 或 `common/release` 下
