@@ -83,30 +83,42 @@ android {
         encoding = 'utf-8'
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.1'
     }
 
-    splits {
-
-        // Configures multiple APKs based on ABI.
-        abi {
-
-            // Enables building multiple APKs per ABI.
-            enable true
-
-            // By default all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
-//            include "x86", "armeabi-v7a"
-
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk false
+    // abi拆分 使用splits不知道怎么复制对应abi的template.apk到src/main/assets下
+    flavorDimensions "abi"
+    productFlavors {
+        arm64_v8a {
+            dimension "abi"
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+        }
+        armeabi_v7a {
+            dimension "abi"
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
+        x86 {
+            dimension "abi"
+            ndk {
+                abiFilters "x86"
+            }
+        }
+        x86_64 {
+            dimension "abi"
+            ndk {
+                abiFilters "x86_64"
+            }
+        }
+        universal {
+            dimension "abi"
+            ndk {
+                abiFilters "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
+            }
         }
     }
     lint {
@@ -114,34 +126,136 @@ android {
         disable 'MissingTranslation', 'ExtraTranslation'
     }
 }
-def copyRelease(abi) {
+
+// 获取abi & buildTypes
+// 调用示例: 
+// def result = getAbiAndBuildType(project)
+// def abi = result.abi
+// def buildType = result.buildType
+def getAbiAndBuildType() {
+    // 获取当前编译变体
+    def taskRequests = project.getGradle().getStartParameter().getTaskRequests()
+    def args = taskRequests.collect { it.getArgs() }.flatten()
+
+    // 检查 args 是否为空
+    if (args.isEmpty()) {
+        return [buildVariant: "assembleArm64_v8aRelease", abi: "arm64_v8a", buildType: "release"]
+    }
+
+    def buildVariant = args[0].split(':')[-1]
+
+    // 提取 ABI 和构建类型
+    def abi = buildVariant.replaceAll('assemble', '').replaceAll(/Debug|Release/, '')
+    def buildType = buildVariant.replaceAll(/.*?assemble/, '').replaceAll(abi, '')
+
+    abi = abi.toLowerCase()
+    buildType = buildType.toLowerCase()
+
+    println "selected build variant: $buildVariant"
+    println "abi: $abi"
+    println "build type: $buildType"
+
+    return [buildVariant: buildVariant, abi: abi, buildType: buildType]
+}
+
+// 编译 inrt (template.apk)
+def buildTemplateApk() {
+    def osName = System.getProperty("os.name").toLowerCase()
+
+    // 获取当前编译变体
+    def buildArg = getAbiAndBuildType()
+    def buildVariant = buildArg.buildVariant
+
+    exec {
+        println "exec gradlew inrt:${buildVariant}"
+        workingDir file('../')
+        println "current platform: ${osName}"
+        if (osName.contains("win")) {
+            commandLine 'cmd', '/c', "gradlew inrt:${buildVariant}"
+        } else {
+            commandLine './gradlew', "inrt:${buildVariant}"
+        }
+    }
+}
+
+// 复制 inrt-xxx-xxx.apk 为 src/main/assets/template.apk
+def copyTemplateApk() {
     copy {
-        def fromFile = file('./build/outputs/apk/release')
-        def intoFile = file('../common/release')
-        println 'copy release apk ' + abi + ' from ' + fromFile + ' into ' + intoFile
+        // 获取当前编译变体
+        def buildArg = getAbiAndBuildType()
+        def abi = buildArg.abi
+        def buildType = buildArg.buildType
+
+        def fromFileStr = "../inrt/build/outputs/apk/${abi}/${buildType}/"
+        def fileName = "inrt-${abi}-${buildType}.apk"
+
+        def fromFile = file(fromFileStr)
+        def intoFile = file("./src/main/assets/")
+
+        println 'copy template.apk from ' + fromFileStr + fileName
+        println 'into ' + intoFile
+
         from fromFile
         into intoFile
-        def fileName = 'app-' + abi + '-release.apk'
         include fileName
+        rename fileName, 'template.apk'
+    }
+}
+
+// 复制 app-xx-xx.apk
+def copyFinalApk() {
+    copy {
+        // 获取当前编译变体
+        def buildArg = getAbiAndBuildType()
+        def abi = buildArg.abi
+        def buildType = buildArg.buildType
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd")
         def currentDate = sdf.format(new Date())
-        rename fileName, versions.patchName + '.' + abi + '.' + currentDate + '.apk'
+
+        def fromFileStr = "./build/outputs/apk/${abi}/${buildType}/"
+        def intoFileStr = "../common/${buildType}/"
+        def fileName = "app-${abi}-${buildType}.apk"
+
+        def fromFile = file(fromFileStr)
+        def intoFile = file(intoFileStr)
+
+        println 'copy final apk from ' + fromFileStr + fileName
+        println 'into ' + intoFileStr
+
+        from fromFile
+        into intoFile
+        include fileName
+        rename fileName, "${versions.patchName}-${abi}-${buildType}-${currentDate}.apk"
     }
 }
 
-
-task copyReleaseApk {
+tasks.register('buildAndCopyTemplateApk') {
+    doFirst {
+        buildTemplateApk()
+    }
     doLast {
-        copyRelease('armeabi-v7a')
-        copyRelease('arm64-v8a')
+        copyTemplateApk()
     }
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
-        task.finalizedBy 'copyReleaseApk'
+tasks.register('copyFinalApks') {
+    doLast {
+        copyFinalApk()
     }
 }
+
+// 在执行 preBuild 任务之前, 编译复制 template.apk
+preBuild.dependsOn 'buildAndCopyTemplateApk'
+
+// 在整个 build 完成后执行任务
+tasks.configureEach { task ->
+    def taskName = task.name
+    if (taskName.contains("assemble")) {
+        task.finalizedBy "copyFinalApks"
+    }
+}
+
 
 repositories {
     google()

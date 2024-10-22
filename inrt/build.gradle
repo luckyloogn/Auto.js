@@ -37,25 +37,39 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    splits {
 
-        // Configures multiple APKs based on ABI.
-        abi {
-
-            // Enables building multiple APKs per ABI.
-            enable true
-
-            // By default all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
-
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk false
+    // abi拆分
+    flavorDimensions "abi"
+    productFlavors {
+        arm64_v8a {
+            dimension "abi"
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+        }
+        armeabi_v7a {
+            dimension "abi"
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
+        x86 {
+            dimension "abi"
+            ndk {
+                abiFilters "x86"
+            }
+        }
+        x86_64 {
+            dimension "abi"
+            ndk {
+                abiFilters "x86_64"
+            }
+        }
+        universal {
+            dimension "abi"
+            ndk {
+                abiFilters "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
+            }
         }
     }
     buildTypes {
@@ -77,66 +91,6 @@ android {
     lint {
         abortOnError false
         disable 'MissingTranslation', 'ExtraTranslation'
-    }
-}
-
-static def inspectSimpleVersion(originalString) {
-    // 使用正则表达式匹配版本号部分
-    def versionPattern = Pattern.compile(/.*(\d+\.\d+\.\d+\.\d+).*/)
-    def matcher = versionPattern.matcher(originalString)
-    if (matcher.find()) {
-        def versionPart = matcher.group(1)
-        return versionPart
-    }
-    return originalString
-}
-
-def buildApkPluginForAbi(File pluginProjectDir, String abi) {
-    copy {
-        def fromFile = file('build/outputs/apk/release/')
-        def intoFile = new File(pluginProjectDir, 'app/src/main/assets')
-        println 'copy from app releases，pluginDir:' + pluginProjectDir + ' fromFile:' + fromFile
-        println 'into file:' + intoFile
-        from fromFile
-        into intoFile
-        def fileName = "inrt-" + abi + "-release.apk"
-        include fileName
-        rename fileName, 'template.apk'
-    }
-    exec {
-        println 'exec gradlew assembleRelease'
-        workingDir pluginProjectDir
-        commandLine './gradlew', 'assembleRelease'
-    }
-    copy {
-        def fromFile = new File(pluginProjectDir, 'app/build/outputs/apk/release')
-        def intoFile = file('../common/release')
-        println 'copy builder apk ' + abi + ' from ' + fromFile + ' into ' + intoFile
-        from fromFile
-        into intoFile
-        def fileName = 'app-release.apk'
-        include fileName
-        rename fileName, '打包插件-' + abi + '-' + inspectSimpleVersion(versions.appVersionName) + '.apk'
-    }
-}
-
-task buildApkPlugin {
-    doLast {
-        def pluginProjectDirPath = '../../Auto.js-ApkBuilder'
-        def pluginProjectDir = file(pluginProjectDirPath)
-        if (!pluginProjectDir.exists() || !pluginProjectDir.isDirectory()) {
-            println 'pluginProjectDir not exists'
-            return
-        }
-        buildApkPluginForAbi(pluginProjectDir, 'armeabi-v7a')
-        buildApkPluginForAbi(pluginProjectDir, 'arm64-v8a')
-        buildApkPluginForAbi(pluginProjectDir, 'x86')
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
-        task.finalizedBy 'buildApkPlugin'
     }
 }
 

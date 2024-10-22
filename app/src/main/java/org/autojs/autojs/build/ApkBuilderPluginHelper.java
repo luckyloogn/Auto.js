@@ -19,40 +19,16 @@ import java.io.InputStream;
 
 public class ApkBuilderPluginHelper {
 
-    private static final String PLUGIN_PACKAGE_NAME = "org.fake.builder.plugin";
     private static final String TEMPLATE_APK_PATH = "template.apk";
-    private static final boolean DEBUG_APK_PLUGIN = false;
-
-    public static boolean isPluginAvailable(Context context) {
-        return DeveloperUtils.checkSignature(context, PLUGIN_PACKAGE_NAME);
-    }
 
     public static InputStream openTemplateApk(Context context) {
         try {
-            if (DEBUG_APK_PLUGIN && BuildConfig.DEBUG) {
-                return context.getAssets().open(TEMPLATE_APK_PATH);
-            }
-            return context.getPackageManager().getResourcesForApplication(PLUGIN_PACKAGE_NAME)
-                    .getAssets().open(TEMPLATE_APK_PATH);
+            return context.getAssets().open(TEMPLATE_APK_PATH);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    public static int getPluginVersion(Context context) {
-        try {
-            PackageInfo info = context.getPackageManager().getPackageInfo(PLUGIN_PACKAGE_NAME, 0);
-            return info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            return -1;
-        }
-    }
-
-    public static int getSuitablePluginVersion() {
-        return BuildConfig.VERSION_CODE - 200;
-    }
 }
 
 

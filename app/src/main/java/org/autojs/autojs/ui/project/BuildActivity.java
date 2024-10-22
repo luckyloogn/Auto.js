@@ -132,7 +132,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
-        checkApkBuilderPlugin();
     }
 
     /**
@@ -172,39 +171,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         recyclerView.setAdapter(adapter);
     }
 
-    private void checkApkBuilderPlugin() {
-        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
-            showPluginDownloadDialog(R.string.no_apk_builder_plugin, true);
-            return;
-        }
-        int version = ApkBuilderPluginHelper.getPluginVersion(this);
-        if (version < 0) {
-            showPluginDownloadDialog(R.string.no_apk_builder_plugin, true);
-            return;
-        }
-        if (version < ApkBuilderPluginHelper.getSuitablePluginVersion()) {
-            showPluginDownloadDialog(R.string.apk_builder_plugin_version_too_low, false);
-        }
-    }
-
-    private void showPluginDownloadDialog(int msgRes, boolean finishIfCanceled) {
-        new ThemeColorMaterialDialogBuilder(this)
-                .content(msgRes)
-                .positiveText(R.string.ok)
-                .negativeText(R.string.cancel)
-                .onPositive((dialog, which) -> downloadPlugin())
-                .onNegative((dialog, which) -> {
-                    if (finishIfCanceled) finish();
-                })
-                .show();
-
-    }
-
-    private void downloadPlugin() {
-        IntentUtil.browse(this, String.format(Locale.getDefault(),
-                "https://i.autojs.org/autojs/plugin/%d.apk", ApkBuilderPluginHelper.getSuitablePluginVersion()));
-    }
-
     @SuppressLint("StringFormatInvalid")
     private void setupWithSourceFile(ScriptFile file) {
         String dir = file.getParent();
@@ -220,7 +186,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
     }
 
     @Click(R.id.select_source)
@@ -269,10 +234,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @Click(R.id.fab)
     void buildApk() {
-        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
-            Toast.makeText(this, R.string.text_apk_builder_plugin_unavailable, Toast.LENGTH_SHORT).show();
-            return;
-        }
         if (!checkInputs()) {
             return;
         }
