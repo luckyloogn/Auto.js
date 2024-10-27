@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/settings"
-        android:title="@string/text_settings"/>
+        android:id="@+id/action_settings"
+        android:title="@string/text_settings"
+        android:icon="@drawable/baseline_settings_24" />
+
+    <item
+        android:id="@+id/action_exit"
+        android:title="@string/text_exit"
+        android:icon="@drawable/baseline_exit_24" />
+
+    <item
+        android:id="@+id/action_clear_log"
+        android:title="@string/text_clear_log"
+        android:icon="@drawable/baseline_clear_all_24"
+        app:showAsAction="always" />
+
 </menu>

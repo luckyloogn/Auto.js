@@ -4,6 +4,8 @@
     <string name="text_auto_operate_service_enabled_but_not_running">无障碍服务已启用但没有运行，您可以尝试重新启用或重启手机</string>
     <string name="text_enable_accessibility_service_by_root_timeout">使用root权限启用无障碍服务失败</string>
     <string name="text_settings">设置</string>
+    <string name="text_exit">退出</string>
+    <string name="text_clear_log">清除日志</string>
     <string name="text_script_running">脚本运行</string>
 
     <string name="key_use_volume_control_running">key_use_volume_control_running</string>
