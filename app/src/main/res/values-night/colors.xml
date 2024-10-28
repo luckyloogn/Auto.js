@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="textColorPrimary">#FFFFFF</color>
     <color name="window_background">#202020</color>
     <color name="item_background">#333333</color>
     <color name="item_background_dark">#252525</color>

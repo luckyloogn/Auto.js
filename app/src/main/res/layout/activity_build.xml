@@ -71,7 +71,8 @@
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/source_path"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/textColorPrimary" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -100,7 +101,8 @@
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/output_path"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/textColorPrimary" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
@@ -148,7 +150,8 @@
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/app_name"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/textColorPrimary" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -161,7 +164,8 @@
                                 android:id="@+id/package_name"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_." />
+                                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_."
+                                android:textColor="@color/textColorPrimary" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
@@ -185,8 +189,8 @@
                                         android:id="@+id/version_name"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-
-                                        android:text="1.0.0" />
+                                        android:text="1.0.0"
+                                        android:textColor="@color/textColorPrimary" />
                                 </com.google.android.material.textfield.TextInputLayout>
 
                                 <com.google.android.material.textfield.TextInputLayout
@@ -199,9 +203,9 @@
                                         android:id="@+id/version_code"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
-
                                         android:inputType="number"
-                                        android:text="1" />
+                                        android:text="1"
+                                        android:textColor="@color/textColorPrimary" />
                                 </com.google.android.material.textfield.TextInputLayout>
                             </LinearLayout>
 
@@ -257,27 +261,27 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/text_build_delete_tips" />
+                            android:text="@string/text_build_config_extra_libs_tips" />
 
                         <CheckBox
                             android:id="@+id/use_open_cv"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"
+                            android:checked="false"
                             android:text="@string/text_use_opencv" />
 
                         <CheckBox
                             android:id="@+id/use_paddle_ocr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"
+                            android:checked="false"
                             android:text="@string/text_use_paddle_ocr" />
 
                         <CheckBox
                             android:id="@+id/use_ml_kit_ocr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"
+                            android:checked="false"
                             android:text="@string/text_use_ml_kit_ocr" />
 
                         <CheckBox
@@ -312,9 +316,10 @@
                             android:text="@string/text_build_permission_tips" />
 
                         <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/recycler_view"
+                            android:id="@+id/recycler_view_permissions"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false" />
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>

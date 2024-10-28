@@ -5,9 +5,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Editable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -34,6 +39,10 @@ import org.autojs.autojs.ui.widget.SimpleTextWatcher;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
@@ -42,6 +51,8 @@ import io.reactivex.schedulers.Schedulers;
 
 @EActivity(R.layout.activity_project_config)
 public class ProjectConfigActivity extends BaseActivity {
+
+    private static final String LOG_TAG = "ProjectConfigActivity";
 
     public static final String EXTRA_PARENT_DIRECTORY = "parent_directory";
 
@@ -80,6 +91,21 @@ public class ProjectConfigActivity extends BaseActivity {
     private boolean mNewProject;
     private Bitmap mIconBitmap;
 
+    private PermissionOptionAdapter mPermissionOptionAdapter;
+    private List<PermissionOption> mPermissionOptions;
+
+    @ViewById(R.id.use_open_cv)
+    CheckBox mUseOpenCv;
+
+    @ViewById(R.id.use_paddle_ocr)
+    CheckBox mUsePaddleOcr;
+
+    @ViewById(R.id.use_ml_kit_ocr)
+    CheckBox mUseMlKitOcr;
+
+    @ViewById(R.id.use_onnx_runtime)
+    CheckBox mUseOnnx;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +142,7 @@ public class ProjectConfigActivity extends BaseActivity {
             return;
         }
         setToolbarAsBack(mNewProject ? getString(R.string.text_new_project) : mProjectConfig.getName());
+        preparePermissionView();
         if (mNewProject) {
             mAppName.addTextChangedListener(new SimpleTextWatcher(s ->
                     mProjectLocation.setText(new File(mParentDirectory, s.toString()).getPath()))
@@ -133,7 +160,39 @@ public class ProjectConfigActivity extends BaseActivity {
                         .load(new File(mDirectory, icon))
                         .into(mIcon);
             }
+
+            // 打包配置
+            mUseOpenCv.setChecked(mProjectConfig.getUseOpenCv());
+            mUsePaddleOcr.setChecked(mProjectConfig.getUsePaddleOcr());
+            mUseMlKitOcr.setChecked(mProjectConfig.getUseMlKitOcr());
+            mUseOnnx.setChecked(mProjectConfig.getUseOnnx());
+
+            Set<String> selectedPermissions = mProjectConfig.getPermissions();
+            for (int i = 0; i < mPermissionOptions.size(); i++) {
+                PermissionOption option = mPermissionOptions.get(i);
+                boolean isSelected = selectedPermissions.contains(option.getPermission());
+                option.setSelected(isSelected);
+
+                mPermissionOptionAdapter.notifyItemChanged(i);
+            }
         }
+    }
+
+    /**
+     * 构建权限选项列表
+     */
+    private void preparePermissionView() {
+        RecyclerView recyclerView = findViewById(R.id.recycler_view_permissions);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // 权限及说明
+        String[][] permissions = PermissionProvider.getPermissions(this);
+        mPermissionOptions = new ArrayList<>();
+        for (String[] permission : permissions) {
+            mPermissionOptions.add(new PermissionOption(permission[0], permission[1], false));
+        }
+        mPermissionOptionAdapter = new PermissionOptionAdapter(mPermissionOptions);
+        recyclerView.setAdapter(mPermissionOptionAdapter);
+        mPermissionOptionAdapter.calculateAndSetRecyclerViewHeight(recyclerView);
     }
 
     @SuppressLint("CheckResult")
@@ -210,6 +269,21 @@ public class ProjectConfigActivity extends BaseActivity {
             mDirectory = new File(location);
         }
         //mProjectConfig.getLaunchConfig().setHideLogs(true);
+
+        // 同步打包配置
+        mProjectConfig.setUseOpenCv(mUseOpenCv.isChecked());
+        mProjectConfig.setUsePaddleOcr(mUsePaddleOcr.isChecked());
+        mProjectConfig.setUseMlKitOcr(mUseMlKitOcr.isChecked());
+        mProjectConfig.setUseOnnx(mUseOnnx.isChecked());
+
+        Set<String> enabledPermission = new HashSet<>();
+        for (PermissionOption option : mPermissionOptions) {
+            Log.d(LOG_TAG, "Option: " + option.getPermission() + ", Selected: " + option.isSelected());
+            if (option.isSelected()) {
+                enabledPermission.add(option.getPermission());
+            }
+        }
+        mProjectConfig.setPermissions(enabledPermission);
     }
 
     private boolean checkInputs() {

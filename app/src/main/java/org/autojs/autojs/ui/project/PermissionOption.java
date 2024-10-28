@@ -1,8 +1,8 @@
 package org.autojs.autojs.ui.project;
 
 public class PermissionOption {
-    private String permission;
-    private String permissionDesc;
+    private final String permission;
+    private final String permissionDesc;
     private boolean isSelected;
 
     public PermissionOption(String permission, String permissionDesc, boolean isSelected) {

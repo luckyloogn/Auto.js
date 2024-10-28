@@ -14,10 +14,6 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * option选项适配器，用于在RecyclerView中添加单选选项
- * Powered by ChatGPT3.5
- */
 public class PermissionOptionAdapter extends RecyclerView.Adapter<PermissionOptionAdapter.BuildPermissionOptionViewHolder> {
     private static final String TAG = "PermissionOptionAdapter";
 
@@ -37,12 +33,20 @@ public class PermissionOptionAdapter extends RecyclerView.Adapter<PermissionOpti
         return new BuildPermissionOptionViewHolder(itemView);
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull BuildPermissionOptionViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder position: " + position);
         PermissionOption option = options.get(position);
-        holder.bind(option);
+
+        holder.checkBox.setChecked(option.isSelected());
+//        holder.permissionText.setText(option.getPermission().split("permission.")[1]);
+        holder.permissionText.setText(option.getPermission());
+        holder.permissionDescText.setText(option.getPermissionDesc());
+
+        holder.itemView.setOnClickListener(v -> {
+            option.setSelected(!option.isSelected());
+            holder.checkBox.setChecked(option.isSelected());
+            notifyItemChanged(position); // 刷新当前项
+        });
     }
 
     @Override
@@ -51,9 +55,24 @@ public class PermissionOptionAdapter extends RecyclerView.Adapter<PermissionOpti
         return options.size();
     }
 
-    public static class BuildPermissionOptionViewHolder extends RecyclerView.ViewHolder {
+    // 根据item总数计算并设置RecyclerView的总高度
+    public void calculateAndSetRecyclerViewHeight(RecyclerView recyclerView) {
+        int totalHeight = 0;
+        for (int i = 0; i < getItemCount(); i++) {
+            View itemView = onCreateViewHolder(recyclerView, getItemViewType(i)).itemView;
+            itemView.measure(
+                    View.MeasureSpec.makeMeasureSpec(recyclerView.getWidth(), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            );
+            totalHeight += itemView.getMeasuredHeight();
+        }
 
-        private static final String TAG = "BuildPermissionOptionViewHolder";
+        ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+        params.height = totalHeight + (recyclerView.getPaddingTop() + recyclerView.getPaddingBottom());
+        recyclerView.setLayoutParams(params);
+    }
+
+    public static class BuildPermissionOptionViewHolder extends RecyclerView.ViewHolder {
         private final CheckBox checkBox;
         private final TextView permissionText;
         private final TextView permissionDescText;
@@ -64,18 +83,5 @@ public class PermissionOptionAdapter extends RecyclerView.Adapter<PermissionOpti
             permissionText = itemView.findViewById(R.id.permission_text);
             permissionDescText = itemView.findViewById(R.id.permission_desc_text);
         }
-
-        void bind(final PermissionOption option) {
-            Log.d(TAG, "bind option: " + option.getPermission());
-            checkBox.setChecked(option.isSelected());
-            permissionText.setText(option.getPermission().split("permission.")[1]);
-            permissionDescText.setText(option.getPermissionDesc());
-
-            itemView.setOnClickListener(view -> {
-                option.setSelected(!option.isSelected());
-                checkBox.setChecked(option.isSelected());
-            });
-        }
     }
-
 }

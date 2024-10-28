@@ -12,8 +12,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Stardust on 2018/1/24.
@@ -57,6 +59,21 @@ public class ProjectConfig {
 
     @SerializedName("useFeatures")
     private List<String> mFeatures = new ArrayList<>();
+
+    @SerializedName("useOpenCv")
+    private Boolean useOpenCv = false;
+
+    @SerializedName("usePaddleOcr")
+    private Boolean usePaddleOcr = false;
+
+    @SerializedName("useMlKitOcr")
+    private Boolean useMlKitOcr = false;
+
+    @SerializedName("useOnnx")
+    private Boolean useOnnx = false;
+
+    @SerializedName("permissions")
+    private Set<String> mPermissions = new HashSet<>();
 
 
     public static ProjectConfig fromJson(String json) {
@@ -236,7 +253,7 @@ public class ProjectConfig {
         if (config == null) {
             config = new ScriptConfig();
         }
-        if(mFeatures.isEmpty()){
+        if (mFeatures.isEmpty()) {
             return config;
         }
         ArrayList<String> features = new ArrayList<>(config.getFeatures());
@@ -247,5 +264,45 @@ public class ProjectConfig {
         }
         config.setFeatures(features);
         return config;
+    }
+
+    public Boolean getUseOpenCv() {
+        return useOpenCv;
+    }
+
+    public void setUseOpenCv(Boolean useOpenCv) {
+        this.useOpenCv = useOpenCv;
+    }
+
+    public Boolean getUsePaddleOcr() {
+        return usePaddleOcr;
+    }
+
+    public void setUsePaddleOcr(Boolean usePaddleOcr) {
+        this.usePaddleOcr = usePaddleOcr;
+    }
+
+    public Boolean getUseMlKitOcr() {
+        return useMlKitOcr;
+    }
+
+    public void setUseMlKitOcr(Boolean useMlKitOcr) {
+        this.useMlKitOcr = useMlKitOcr;
+    }
+
+    public Boolean getUseOnnx() {
+        return useOnnx;
+    }
+
+    public void setUseOnnx(Boolean useOnnx) {
+        this.useOnnx = useOnnx;
+    }
+
+    public Set<String> getPermissions() {
+        return mPermissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        mPermissions = permissions;
     }
 }

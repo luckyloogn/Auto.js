@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.project;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -30,7 +29,6 @@ import org.autojs.autojs.build.ApkBuilder;
 import org.autojs.autojs.build.ApkBuilderPluginHelper;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.tool.BitmapTool;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
@@ -40,11 +38,8 @@ import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity_;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -53,6 +48,7 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -109,10 +105,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @ViewById(R.id.use_onnx_runtime)
     CheckBox mUseOnnx;
 
-    @ViewById(R.id.recycler_view)
-    RecyclerView recyclerView;
-
-    private final List<PermissionOption> options = new ArrayList<>();
+    private List<PermissionOption> mPermissionOptions;
+    private PermissionOptionAdapter mPermissionOptionAdapter;
 
     private ProjectConfig mProjectConfig;
     private MaterialDialog mProgressDialog;
@@ -136,39 +130,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     /**
      * 构建权限选项列表
-     * Powered by ChatGPT3.5
      */
     private void preparePermissionView() {
+        RecyclerView recyclerView = findViewById(R.id.recycler_view_permissions);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         // 权限及说明
-        String[][] permissions = {
-                {"android.permission.ACCESS_WIFI_STATE", getString(R.string.desc_permission_access_wifi_state)},
-                {"android.permission.ACCESS_NETWORK_STATE", getString(R.string.desc_permission_access_network_state)},
-                {"android.permission.ACCESS_FINE_LOCATION", getString(R.string.desc_permission_access_fine_location)},
-                {"android.permission.ACCESS_COARSE_LOCATION", getString(R.string.desc_permission_access_coarse_location)},
-                {"android.permission.SCHEDULE_EXACT_ALARM", getString(R.string.desc_permission_schedule_exact_alarm)},
-                {"android.permission.QUERY_ALL_PACKAGES", getString(R.string.desc_permission_query_all_packages)},
-                {"android.permission.WRITE_EXTERNAL_STORAGE", getString(R.string.desc_permission_write_external_storage)},
-                {"android.permission.MANAGE_EXTERNAL_STORAGE", getString(R.string.desc_permission_manage_external_storage)},
-                {"android.permission.READ_EXTERNAL_STORAGE", getString(R.string.desc_permission_read_external_storage)},
-                {"android.permission.INTERNET", getString(R.string.desc_permission_internet)},
-                {"android.permission.SYSTEM_ALERT_WINDOW", getString(R.string.desc_permission_system_alert_window)},
-                {"android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", getString(R.string.desc_permission_request_ignore_battery_optimizations)},
-                {"android.permission.RECEIVE_BOOT_COMPLETED", getString(R.string.desc_permission_receive_boot_completed)},
-                {"android.permission.FOREGROUND_SERVICE", getString(R.string.desc_permission_foreground_service)},
-                {"android.permission.RECORD_AUDIO", getString(R.string.desc_permission_record_audio)},
-                {"android.permission.READ_PHONE_STATE", getString(R.string.desc_permission_read_phone_state)},
-                {"com.android.launcher.permission.INSTALL_SHORTCUT", getString(R.string.desc_permission_install_shortcut)},
-                {"com.android.launcher.permission.UNINSTALL_SHORTCUT", getString(R.string.desc_permission_uninstall_shortcut)}
-        };
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Arrays.sort(permissions, Comparator.comparing(a -> a[0]));
-        }
+        String[][] permissions = PermissionProvider.getPermissions(this);
+        mPermissionOptions = new ArrayList<>();
         for (String[] permission : permissions) {
-            options.add(new PermissionOption(permission[0], permission[1],false));
+            mPermissionOptions.add(new PermissionOption(permission[0], permission[1], false));
         }
-        PermissionOptionAdapter adapter = new PermissionOptionAdapter(options);
-        recyclerView.setAdapter(adapter);
+        mPermissionOptionAdapter = new PermissionOptionAdapter(mPermissionOptions);
+        recyclerView.setAdapter(mPermissionOptionAdapter);
+        mPermissionOptionAdapter.calculateAndSetRecyclerViewHeight(recyclerView);
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -206,11 +180,28 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         }
         mProjectConfig = ProjectConfig.fromProjectDir(file.getPath());
         if (mProjectConfig == null) {
+            // 没有找到"project.json"文件，说明是针对单个js文件打包
             return;
         }
-        mOutputPath.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
-        mAppConfig.setVisibility(View.GONE);
-        mSourcePathContainer.setVisibility(View.GONE);
+
+        // 存在"project.json"文件，对项目打包
+        mOutputPath.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath()); // 根据"project.json"设置输出目录
+        mAppConfig.setVisibility(View.GONE); // 隐藏“脚本文件(夹)路径”和“选择”按钮
+        mSourcePathContainer.setVisibility(View.GONE); // 隐藏“配置”卡片
+        // 根据"project.json"设置使用的额外库
+        mUseOpenCv.setChecked(mProjectConfig.getUseOpenCv());
+        mUsePaddleOcr.setChecked(mProjectConfig.getUsePaddleOcr());
+        mUseMlKitOcr.setChecked(mProjectConfig.getUseMlKitOcr());
+        mUseOnnx.setChecked(mProjectConfig.getUseOnnx());
+
+        Set<String> selectedPermissions = mProjectConfig.getPermissions();
+        for (int i = 0; i < mPermissionOptions.size(); i++) {
+            PermissionOption option = mPermissionOptions.get(i);
+            boolean isSelected = selectedPermissions.contains(option.getPermission());
+            option.setSelected(isSelected);
+
+            mPermissionOptionAdapter.notifyItemChanged(i);
+        }
     }
 
     @Click(R.id.select_output)
@@ -315,7 +306,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         appConfig.setUseMlKitOcr(mUseMlKitOcr.isChecked());
         appConfig.setUseOnnx(mUseOnnx.isChecked());
         Set<String> enabledPermission = new HashSet<>();
-        for (PermissionOption option : options) {
+        for (PermissionOption option : mPermissionOptions) {
             if (option.isSelected()) {
                 enabledPermission.add(option.getPermission());
             }
