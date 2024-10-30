@@ -77,6 +77,10 @@ public class ApkBuilder {
         Boolean useMlKitOcr = false;
         Boolean useOnnx = false;
         Set<String> enabledPermission = new HashSet<>();
+        Boolean V1SigningEnabled = true;
+        Boolean V2SigningEnabled = true;
+        Boolean V3SigningEnabled = false;
+        Boolean V4SigningEnabled = false;
 
         public static AppConfig fromProjectConfig(String projectDir, ProjectConfig projectConfig) {
             String icon = projectConfig.getIcon();
@@ -193,6 +197,38 @@ public class ApkBuilder {
 
         public void setEnabledPermission(Set<String> enabledPermission) {
             this.enabledPermission = enabledPermission;
+        }
+
+        public Boolean getV1SigningEnabled() {
+            return this.V1SigningEnabled;
+        }
+
+        public void setV1SigningEnabled(Boolean enabled) {
+            this.V1SigningEnabled = enabled;
+        }
+
+        public Boolean getV2SigningEnabled() {
+            return this.V2SigningEnabled;
+        }
+
+        public void setV2SigningEnabled(Boolean enabled) {
+            this.V2SigningEnabled = enabled;
+        }
+
+        public Boolean getV3SigningEnabled() {
+            return this.V3SigningEnabled;
+        }
+
+        public void setV3SigningEnabled(Boolean enabled) {
+            this.V3SigningEnabled = enabled;
+        }
+
+        public Boolean getV4SigningEnabled() {
+            return this.V4SigningEnabled;
+        }
+
+        public void setV4SigningEnabled(Boolean enabled) {
+            this.V4SigningEnabled = enabled;
         }
     }
 
@@ -457,9 +493,10 @@ public class ApkBuilder {
         com.android.apksig.ApkSigner.Builder apkSignerBuilder = (new com.android.apksig.ApkSigner.Builder(signerConfigs))
                 .setInputApk(mOutApkFile).setOutputApk(tmpOutputApk)
                 .setOtherSignersSignaturesPreserved(false)
-                .setV1SigningEnabled(true)
-                .setV2SigningEnabled(true)
-                .setV3SigningEnabled(false);
+                .setV1SigningEnabled(mAppConfig.V1SigningEnabled)
+                .setV2SigningEnabled(mAppConfig.V2SigningEnabled)
+                .setV3SigningEnabled(mAppConfig.V3SigningEnabled)
+                .setV4SigningEnabled(mAppConfig.V4SigningEnabled);
 
         ApkSigner apkSigner = apkSignerBuilder.build();
 

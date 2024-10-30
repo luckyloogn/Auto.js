@@ -45,6 +45,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -104,6 +105,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @ViewById(R.id.use_onnx_runtime)
     CheckBox mUseOnnx;
+
+    @ViewById(R.id.signature_scheme)
+    AppCompatSpinner mSignatureScheme;
 
     private List<PermissionOption> mPermissionOptions;
     private PermissionOptionAdapter mPermissionOptionAdapter;
@@ -312,6 +316,25 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             }
         }
         appConfig.setEnabledPermission(enabledPermission);
+
+//        String[] signatureSchemes = getResources().getStringArray(R.array.signature_scheme_spinner_items);
+        /*
+            <string-array name="signature_scheme_spinner_items">
+                <item>V1 + V2</item>
+                <item>V1 + V3</item>
+                <item>V1 + V2 + V3</item>
+                <item>V1</item>
+                <item>V2 + V3 (Android 7.0+)</item>
+                <item>V2 (Android 7.0+)</item>
+                <item>V3 (Android 9.0+)</item>
+            </string-array>
+         */
+        String signatureScheme = mSignatureScheme.getSelectedItem().toString();
+        appConfig.setV1SigningEnabled(signatureScheme.contains("V1"));
+        appConfig.setV2SigningEnabled(signatureScheme.contains("V2"));
+        appConfig.setV3SigningEnabled(signatureScheme.contains("V3"));
+        appConfig.setV4SigningEnabled(signatureScheme.contains("V4"));
+
         return appConfig;
     }
 

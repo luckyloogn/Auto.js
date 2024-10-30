@@ -424,6 +424,22 @@
     <string name="text_build_delete_tips">打包时可以剔除部分功能的资源包，减少打包体积</string>
     <string name="text_build_config_extra_libs_tips">配置额外库(勾选越多，打包体积越大)</string>
     <string name="text_build_permission_tips">选择打包后所需要使用的权限</string>
+    <string name="text_apk_sign_configs">签名配置</string>
+    <string name="text_key_store">密钥库</string>
+    <string-array name="key_store_spinner_items">
+        <item>默认</item>
+    </string-array>
+    <string name="text_manage_key_store">管理密钥库</string>
+    <string name="text_signature_scheme">签名方案</string>
+    <string-array name="signature_scheme_spinner_items"> <!--  参考MT管理器  -->
+        <item>V1 + V2</item>
+        <item>V1 + V3</item>
+        <item>V1 + V2 + V3</item>
+        <item>V1</item>
+        <item>V2 + V3 (Android 7.0+)</item>
+        <item>V2 (Android 7.0+)</item>
+        <item>V3 (Android 9.0+)</item>
+    </string-array>
     <string name="text_use_opencv">使用OpenCV</string>
     <string name="text_use_paddle_ocr">使用PaddleOCR</string>
     <string name="text_use_ml_kit_ocr">使用ML-KitOCR</string>
