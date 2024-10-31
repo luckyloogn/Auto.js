@@ -356,5 +356,5 @@ dependencies {
     implementation project(':common')
     implementation project(':autojs')
     implementation project(':apkbuilder')
-    implementation project(':autojs-aar:apksigner')
+    implementation 'com.github.TimScriptov:apksigner:1.2.0'
 }

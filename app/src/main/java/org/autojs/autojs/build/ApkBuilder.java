@@ -4,9 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.android.apksig.ApkSigner;
-import com.android.apksigner.PasswordRetriever;
-import com.android.apksigner.SignerParams;
+import com.mcal.apksigner.ApkSigner;
 import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.apkbuilder.ApkUnpackUtil;
 import com.stardust.autojs.apkbuilder.ManifestEditor;
@@ -28,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -483,70 +480,30 @@ public class ApkBuilder {
         */
         // 使用ApkSigner进行v2签名
         signWithApkSigner(mOutApkFile);
+
         return this;
     }
 
     private void signWithApkSigner(File mOutApkFile) throws IOException {
-        copyInputStreamToFile(GlobalAppContext.get().getAssets().open("keystore/buildpkg.bks"), new File(mWorkspacePath + "/buildpkg.bks"));
+        copyInputStreamToFile(GlobalAppContext.get().getAssets().open("keystore/default.jks"), new File(mWorkspacePath + "/default.jks"));
         File tmpOutputApk = new File(mWorkspacePath + "/temp.apk");
-        List<ApkSigner.SignerConfig> signerConfigs = Collections.singletonList(buildSignConfig());
-        com.android.apksig.ApkSigner.Builder apkSignerBuilder = (new com.android.apksig.ApkSigner.Builder(signerConfigs))
-                .setInputApk(mOutApkFile).setOutputApk(tmpOutputApk)
-                .setOtherSignersSignaturesPreserved(false)
-                .setV1SigningEnabled(mAppConfig.V1SigningEnabled)
-                .setV2SigningEnabled(mAppConfig.V2SigningEnabled)
-                .setV3SigningEnabled(mAppConfig.V3SigningEnabled)
-                .setV4SigningEnabled(mAppConfig.V4SigningEnabled);
 
-        ApkSigner apkSigner = apkSignerBuilder.build();
-
-        try {
-            apkSigner.sign();
-        } catch (Exception e) {
-            Log.e("ApkBuilder", "signWithApkSigner failed: ", e);
-            throw new RuntimeException(e);
+        final ApkSigner signer = new ApkSigner(mOutApkFile, tmpOutputApk);
+        signer.setUseDefaultSignatureVersion(false);
+        signer.setV1SigningEnabled(mAppConfig.V1SigningEnabled);
+        signer.setV2SigningEnabled(mAppConfig.V2SigningEnabled);
+        signer.setV3SigningEnabled(mAppConfig.V3SigningEnabled);
+        signer.setV4SigningEnabled(mAppConfig.V4SigningEnabled);
+        if(!signer.signRelease(new File(mWorkspacePath + "/default.jks"), "Auto.js", "Auto.js", "Auto.js")) {
+            throw new RuntimeException("Sign apk failed");
         }
+
         try {
             copyFile(tmpOutputApk, mOutApkFile);
         } catch (Exception e) {
             Log.e("ApkBuilder", "signWithApkSigner: 覆盖签名APK异常", e);
             throw new RuntimeException(e);
         }
-    }
-
-    private ApkSigner.SignerConfig buildSignConfig() {
-        PasswordRetriever passwordRetriever = new PasswordRetriever();
-        SignerParams signer = new SignerParams();
-        signer.setKeystoreFile(mWorkspacePath + "/buildpkg.bks");
-        Log.d(TAG, "buildSignConfig: store file " + mWorkspacePath + "/buildpkg.bks");
-        signer.setName("signer #1");
-        signer.setKeystorePasswordSpec("pass:buildpkg");
-        signer.setKeystoreKeyAlias("buildpkg");
-        try {
-            signer.loadPrivateKeyAndCerts(passwordRetriever);
-        } catch (Exception e) {
-            Log.e(TAG, "buildSignConfig: Failed to load signer \"" + signer.getName() + "\": " + e.getMessage(), e);
-            throw new RuntimeException("Failed to load signer " + e.getMessage());
-        }
-
-        String v1SigBasename;
-        if (signer.getV1SigFileBasename() != null) {
-            v1SigBasename = signer.getV1SigFileBasename();
-        } else if (signer.getKeystoreKeyAlias() != null) {
-            v1SigBasename = signer.getKeystoreKeyAlias();
-        } else if (signer.getKeyFile() != null) {
-            String keyFileName = new File(signer.getKeyFile()).getName();
-            int delimiterIndex = keyFileName.indexOf('.');
-            if (delimiterIndex == -1) {
-                v1SigBasename = keyFileName;
-            } else {
-                v1SigBasename = keyFileName.substring(0, delimiterIndex);
-            }
-        } else {
-            throw new RuntimeException("Neither KeyStore key alias nor private key file available");
-        }
-        Log.d(TAG, "buildSignConfig: sign base name is " + v1SigBasename);
-        return (new ApkSigner.SignerConfig.Builder(v1SigBasename, signer.getPrivateKey(), signer.getCerts())).build();
     }
 
     public ApkBuilder cleanWorkspace() {
