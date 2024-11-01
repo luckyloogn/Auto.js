@@ -125,6 +125,9 @@ android {
         abortOnError false
         disable 'MissingTranslation', 'ExtraTranslation'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 // 获取abi & buildTypes

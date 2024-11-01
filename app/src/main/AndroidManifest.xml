@@ -122,6 +122,9 @@
         <activity
             android:name=".ui.project.BuildActivity_"
             android:configChanges="orientation|screenSize" android:exported="false"/>
+        <activity
+            android:name=".ui.project.ManageKeyStoreActivity"
+            android:configChanges="orientation|screenSize" android:exported="false"/>
         <activity android:name=".ui.project.ProjectConfigActivity_" android:exported="false"/>
         <activity android:name=".ui.log.LogActivity_" android:exported="false"/>
         <activity android:name=".ui.doc.DocumentationActivity_" android:exported="false"/>

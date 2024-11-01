@@ -7,6 +7,7 @@
     <string name="text_go_to_setting">去设置</string>
     <string name="explain_accessibility_permission">软件需要打开\"无障碍服务\"才能运行，请在随后的设置中选择\"Auto.js\"并开启服务。\n您也可以稍后在侧拉菜单中设置。</string>
     <string name="text_cancel">取消</string>
+    <string name="text_confirm">确定</string>
     <string name="text_path_is_empty">路径为空</string>
     <string name="text_file_not_exists">文件不存在</string>
     <string name="text_no_file_rw_permission">无文件读写权限</string>
@@ -440,6 +441,43 @@
         <item>V2 (Android 7.0+)</item>
         <item>V3 (Android 9.0+)</item>
     </string-array>
+    <string name="text_new_key_store">生成签名密钥</string>
+    <string name="text_new_key_store_jks">JKS</string>
+    <string name="text_new_key_store_bks">BKS</string>
+    <string name="text_new_key_store_filename">文件名</string>
+    <string name="text_new_key_store_password">密码</string>
+    <string name="text_new_key_store_alias">别名</string>
+    <string name="text_new_key_store_alias_password">别名密码</string>
+    <string name="text_new_key_store_more_options">更多选项</string>
+    <string name="text_new_key_store_signature_algorithm">签名算法</string>
+    <string-array name="key_store_signature_algorithm_spinner_items"> <!--  AutoX.js v7 -->
+        <item>MD5withRSA</item>
+        <item>SHA1withRSA</item>
+        <item>SHA256withRSA</item>
+        <item>SHA512withRSA</item>
+    </string-array>
+    <string name="text_new_key_store_validity_years">有效期 (年)</string>
+    <string name="text_new_key_store_first_and_last_name">姓名</string>
+    <string name="text_new_key_store_organization">组织名称</string>
+    <string name="text_new_key_store_organizational_unit">组织单位</string>
+    <string name="text_new_key_store_country_code">国家代码 (XX)</string>
+    <string name="text_new_key_store_state_or_province">州或省份</string>
+    <string name="text_new_key_store_city_or_locality">城市或区域</string>
+    <string name="text_new_key_store_street">街道</string>
+    <string name="text_new_key_store_default_alias">key0</string>
+    <string name="text_new_key_store_default_validity_years">25</string>
+    <string name="text_new_key_store_default_country_code">CN</string>
+    <string name="error_filename_empty">文件名不能为空</string>
+    <string name="error_invalid_filename">文件名只能包含字母、数字、下划线或连字符</string>
+    <string name="error_password_empty">密码不能为空</string>
+    <string name="error_password_min_length">密码至少需要6位字符</string>
+    <string name="error_alias_empty">别名不能为空</string>
+    <string name="error_validity_years_empty">有效年份不能为空</string>
+    <string name="error_validity_years_zero">有效年份不能为0</string>
+    <string name="error_invalid_country_code">国家代码必须为两个大写字母</string>
+    <string name="error_all_certificate_issuer_fields_empty">“姓名、组织名称、组织单位、国家代码、州或省份、城市或区域、街道”至少填写一个</string>
+    <string name="success_create_key_store">成功生成签名密钥</string>
+    <string name="error_create_key_store">生成签名密钥失败:</string>
     <string name="text_use_opencv">使用OpenCV</string>
     <string name="text_use_paddle_ocr">使用PaddleOCR</string>
     <string name="text_use_ml_kit_ocr">使用ML-KitOCR</string>

@@ -235,6 +235,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         doBuildingApk();
     }
 
+    @Click(R.id.manage_key_store)
+    void manageKeyStore() {
+        ManageKeyStoreActivity.Companion.startActivity(this);
+    }
+
     private boolean checkInputs() {
         boolean inputValid = true;
         inputValid &= checkNotEmpty(mSourcePath);

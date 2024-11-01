@@ -170,6 +170,10 @@ public class Pref {
         return new File(Environment.getExternalStorageDirectory(), dir).getPath();
     }
 
+    public static String getKeyStorePath() {
+        return getScriptDirPath().concat("/.KeyStore/");
+    }
+
     public static boolean isForegroundServiceEnabled() {
         return def().getBoolean(getString(R.string.key_foreground_servie), false);
     }

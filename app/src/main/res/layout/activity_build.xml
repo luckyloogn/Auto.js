@@ -370,6 +370,7 @@
                                 android:entries="@array/key_store_spinner_items"/>
 
                             <androidx.appcompat.widget.AppCompatButton
+                                android:id="@+id/manage_key_store"
                                 style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
