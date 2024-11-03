@@ -478,6 +478,9 @@
     <string name="error_all_certificate_issuer_fields_empty">“姓名、组织名称、组织单位、国家代码、州或省份、城市或区域、街道”至少填写一个</string>
     <string name="success_create_key_store">成功生成签名密钥</string>
     <string name="error_create_key_store">生成签名密钥失败:</string>
+    <string name="text_key_store_unverified">密钥未验证</string>
+    <string name="text_key_store_verified">密钥已验证</string>
+    <string name="formatter_str_colon_space_str">%s: %s</string>
     <string name="text_use_opencv">使用OpenCV</string>
     <string name="text_use_paddle_ocr">使用PaddleOCR</string>
     <string name="text_use_ml_kit_ocr">使用ML-KitOCR</string>

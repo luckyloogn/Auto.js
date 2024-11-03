@@ -4,7 +4,7 @@
   "target": 31,
   "buildApkTarget": 29,
   "mini": 21,
-  "compile": 33,
+  "compile": 34,
   "buildTool": "30.0.3",
   "patchName": "Auto.js M"
 }
