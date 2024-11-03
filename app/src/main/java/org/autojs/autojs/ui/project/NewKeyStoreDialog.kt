@@ -118,7 +118,6 @@ open class NewKeyStoreDialog(
             }
 
 
-
             val firstAndLastName = binding.firstAndLastName.text.toString()
 
             val organization = binding.organization.text.toString()
@@ -129,15 +128,19 @@ open class NewKeyStoreDialog(
             val cityOrLocality = binding.cityOrLocality.text.toString()
             val street = binding.street.text.toString()
 
-            if (firstAndLastName.isEmpty() && organization.isEmpty() && organizationalUnit.isEmpty() &&
-                stateOrProvince.isEmpty() && cityOrLocality.isEmpty() && street.isEmpty() && countryCode.isEmpty()
-            ) {
-                binding.firstAndLastName.error = getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.organization.error = getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.organizationalUnit.error = getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.countryCode.error = getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.stateOrProvince.error = getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.cityOrLocality.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+            if (firstAndLastName.isEmpty() && organization.isEmpty() && organizationalUnit.isEmpty() && stateOrProvince.isEmpty() && cityOrLocality.isEmpty() && street.isEmpty() && countryCode.isEmpty()) {
+                binding.firstAndLastName.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.organization.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.organizationalUnit.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.countryCode.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.stateOrProvince.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.cityOrLocality.error =
+                    getString(R.string.error_all_certificate_issuer_fields_empty)
                 binding.street.error = getString(R.string.error_all_certificate_issuer_fields_empty)
                 error = true
             } else {
@@ -168,9 +171,9 @@ open class NewKeyStoreDialog(
 
             val configs = NewKeyStoreConfigs(
                 filename = "$filename.$suffix",
-                password = password.toCharArray(),
+                password = password,
                 alias = alias,
-                aliasPassword = aliasPassword.toCharArray(),
+                aliasPassword = aliasPassword,
                 signatureAlgorithm = signatureAlgorithm,
                 validityYears = valvalidityYears,
                 firstAndLastName = firstAndLastName,
@@ -219,9 +222,9 @@ open class NewKeyStoreDialog(
 
     data class NewKeyStoreConfigs(
         val filename: String,
-        val password: CharArray,
+        val password: String,
         val alias: String,
-        val aliasPassword: CharArray,
+        val aliasPassword: String,
         val signatureAlgorithm: String,
         val validityYears: Int,
         val firstAndLastName: String,
@@ -231,25 +234,8 @@ open class NewKeyStoreDialog(
         val stateOrProvince: String,
         val cityOrLocality: String,
         val street: String,
-    ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+    )
 
-            other as NewKeyStoreConfigs
-
-            if (!password.contentEquals(other.password)) return false
-            if (!aliasPassword.contentEquals(other.aliasPassword)) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = password.contentHashCode()
-            result = 31 * result + aliasPassword.contentHashCode()
-            return result
-        }
-    }
 
     interface Callback {
         fun onConfirmButtonClicked(configs: NewKeyStoreConfigs)

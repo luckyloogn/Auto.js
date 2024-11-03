@@ -3,8 +3,8 @@ package org.autojs.autojs.ui.project
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -13,10 +13,13 @@ import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.mcal.apksigner.CertCreator
 import com.mcal.apksigner.utils.DistinguishedNameValues
+import com.mcal.apksigner.utils.KeyStoreHelper
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
 import org.autojs.autojs.databinding.ActivityManageKeyStoreBinding
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.project.NewKeyStoreDialog.NewKeyStoreConfigs
+import org.autojs.autojs.ui.project.VerifyKeyStoreDialog.VerifyKeyStoreConfigs
 import java.io.File
 import java.io.IOException
 
@@ -36,8 +39,16 @@ class ManageKeyStoreActivity : BaseActivity() {
     }
 
     private val newKeyStoreDialogCallback = object : NewKeyStoreDialog.Callback {
-        override fun onConfirmButtonClicked(configs: NewKeyStoreDialog.NewKeyStoreConfigs) {
+        override fun onConfirmButtonClicked(configs: NewKeyStoreConfigs) {
             createKeyStore(configs)
+        }
+    }
+
+    private val verifyKeyStoreDialog = object : VerifyKeyStoreDialog.Callback {
+        override fun onVerifyButtonClicked(
+            configs: VerifyKeyStoreConfigs, keyStore: KeyStore
+        ) {
+            verifyKeyStore(configs, keyStore)
         }
     }
 
@@ -45,16 +56,14 @@ class ManageKeyStoreActivity : BaseActivity() {
         override fun onDeleteButtonClicked(keyStore: KeyStore) {
             MaterialDialog.Builder(this@ManageKeyStoreActivity)
                 .title(getString(R.string.text_are_you_sure_to_delete, keyStore.filename))
-                .positiveText(R.string.ok)
-                .negativeText(R.string.cancel)
+                .positiveText(R.string.ok).negativeText(R.string.cancel)
                 .onPositive { _: MaterialDialog, _: DialogAction ->
                     deleteKeyStore(keyStore)
-                }
-                .show()
+                }.show()
         }
 
         override fun onVerifyButtonClicked(keyStore: KeyStore) {
-            TODO("Not yet implemented")
+            VerifyKeyStoreDialog(verifyKeyStoreDialog, keyStore).show(supportFragmentManager, null)
         }
     }
 
@@ -67,8 +76,7 @@ class ManageKeyStoreActivity : BaseActivity() {
         setToolbarAsBack(getString(R.string.text_manage_key_store))
 
         viewModel = ViewModelProvider(
-            this,
-            ManageKeyStoreActivityViewModel.Factory(this)
+            this, ManageKeyStoreActivityViewModel.Factory(this)
         )[ManageKeyStoreActivityViewModel::class.java]
 
         binding.fab.setOnClickListener {
@@ -83,9 +91,14 @@ class ManageKeyStoreActivity : BaseActivity() {
         }
 
         viewModel.allKeyStores.observe(this@ManageKeyStoreActivity) {
-            keyStoreAdapter.submitList(it)
+            keyStoreAdapter.submitList(it.toList())
         }
 
+        loadKeyStores()
+    }
+
+    override fun onResume() {
+        super.onResume()
         loadKeyStores()
     }
 
@@ -102,7 +115,7 @@ class ManageKeyStoreActivity : BaseActivity() {
         viewModel.updateAllKeyStoresFromFiles(filteredFiles)
     }
 
-    fun createKeyStore(configs: NewKeyStoreDialog.NewKeyStoreConfigs) {
+    fun createKeyStore(configs: NewKeyStoreConfigs) {
         val keyStorePath = File(Pref.getKeyStorePath())
         keyStorePath.mkdirs()
         val file = File(keyStorePath, configs.filename)
@@ -120,45 +133,29 @@ class ManageKeyStoreActivity : BaseActivity() {
         try {
             CertCreator.createKeystoreAndKey(
                 file,
-                configs.password,
+                configs.password.toCharArray(),
                 "RSA",
                 2048,
                 configs.alias,
-                configs.aliasPassword,
+                configs.aliasPassword.toCharArray(),
                 configs.signatureAlgorithm,
                 configs.validityYears,
                 distinguishedNameValues
             )
-            viewModel.upsertKeyStore(
-                KeyStore(
-                    absolutePath = file.absolutePath,
-                    filename = file.name,
-                    password = configs.password.toString(),
-                    alias = configs.alias,
-                    aliasPassword = configs.aliasPassword.toString(),
-                    verified = true
-                )
+            val newKeyStore = KeyStore(
+                absolutePath = file.absolutePath,
+                filename = file.name,
+                password = configs.password,
+                alias = configs.alias,
+                aliasPassword = configs.aliasPassword,
+                verified = true
             )
-            Toast.makeText(
-                this@ManageKeyStoreActivity,
-                getString(R.string.success_create_key_store),
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.d(TAG, "Create Key Store success")
+            viewModel.upsertKeyStore(newKeyStore)
+            showToast(R.string.success_create_key_store)
         } catch (e: IOException) {
-            Toast.makeText(
-                this@ManageKeyStoreActivity,
-                getString(R.string.error_create_key_store) + " " + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.e(TAG, "Create Key Store failed: ", e)
+            showToast(getString(R.string.error_create_key_store) + " " + e.message)
         } catch (e: Exception) {
-            Toast.makeText(
-                this@ManageKeyStoreActivity,
-                getString(R.string.error_create_key_store) + " " + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.e(TAG, "Create Key Store failed: ", e)
+            showToast(getString(R.string.error_create_key_store) + " " + e.message)
         }
     }
 
@@ -167,20 +164,57 @@ class ManageKeyStoreActivity : BaseActivity() {
             try {
                 File(it).delete()
                 viewModel.deleteKeyStore(keyStore)
-                Toast.makeText(
-                    this@ManageKeyStoreActivity,
-                    getString(R.string.text_already_delete) + " " + keyStore.filename,
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast(getString(R.string.text_already_delete) + " " + keyStore.filename)
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@ManageKeyStoreActivity,
-                    getString(R.string.text_delete_failed) + ": " + e.message,
-                    Toast.LENGTH_SHORT
-                ).show()
-                Log.e(TAG, "Delete Key Store failed: ", e)
-                return
+                showToast(getString(R.string.text_delete_failed) + ": " + e.message)
             }
         }
+    }
+
+    fun verifyKeyStore(
+        configs: VerifyKeyStoreConfigs, keyStore: KeyStore
+    ) {
+        // 尝试加载 KeyStore
+        val tmpKeyStore = try {
+            KeyStoreHelper.loadKeyStore(File(keyStore.absolutePath), configs.password.toCharArray())
+        } catch (e: Exception) {
+            null
+        }
+
+        if (tmpKeyStore == null) {
+            showToast(R.string.text_verify_failed)
+            return
+        }
+
+        // 尝试获取密钥
+        val tmpKey = try {
+            tmpKeyStore.getKey(configs.alias, configs.aliasPassword.toCharArray())
+        } catch (e: Exception) {
+            null
+        }
+
+        if (tmpKey == null) {
+            showToast(R.string.text_verify_failed)
+            return
+        }
+
+        val verifiedKeyStore = KeyStore(
+            absolutePath = keyStore.absolutePath,
+            filename = keyStore.filename,
+            password = configs.password,
+            alias = configs.alias,
+            aliasPassword = configs.aliasPassword,
+            verified = true
+        )
+        viewModel.upsertKeyStore(verifiedKeyStore)
+        showToast(R.string.text_verify_success)
+    }
+
+    private fun showToast(@StringRes messageResId: Int) {
+        Toast.makeText(this, getString(messageResId), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

@@ -10,28 +10,23 @@ import org.autojs.autojs.databinding.ItemKeyStoreBinding
 
 class KeyStoreAdaptor(
     private val keyStoreAdapterCallback: KeyStoreAdapterCallback
-) : ListAdapter<KeyStore, KeyStoreAdaptor.KeyStoreViewHolder>(DIFF_CALLBACK) {
+) : ListAdapter<KeyStore, KeyStoreAdaptor.KeyStoreViewHolder>(KeyStoreDiffCallback()) {
 
-    companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<KeyStore>() {
-            override fun areItemsTheSame(oldItem: KeyStore, newItem: KeyStore): Boolean {
-                return oldItem.absolutePath == newItem.absolutePath
-            }
+    class KeyStoreDiffCallback : DiffUtil.ItemCallback<KeyStore>() {
+        override fun areItemsTheSame(oldItem: KeyStore, newItem: KeyStore): Boolean {
+            return oldItem.absolutePath == newItem.absolutePath
+        }
 
-            override fun areContentsTheSame(oldItem: KeyStore, newItem: KeyStore): Boolean {
-                return oldItem.filename == newItem.filename &&
-                        oldItem.password == newItem.password &&
-                        oldItem.alias == newItem.alias &&
-                        oldItem.aliasPassword == newItem.aliasPassword &&
-                        oldItem.verified == newItem.verified
-            }
+        override fun areContentsTheSame(oldItem: KeyStore, newItem: KeyStore): Boolean {
+            return oldItem.filename == newItem.filename &&
+                    oldItem.password == newItem.password &&
+                    oldItem.alias == newItem.alias &&
+                    oldItem.aliasPassword == newItem.aliasPassword &&
+                    oldItem.verified == newItem.verified
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KeyStoreViewHolder {
-        // 解决RecyclerView的item宽度不能铺满问题
-        // 为了确保 RecyclerView 的 item 布局正确地膨胀并应用到 parent，
-        // 应该将 parent ItemKeyStoreBinding.inflate()第二个参数传递，并将 attachToRoot 设置为 false
         val binding = ItemKeyStoreBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
@@ -42,6 +37,11 @@ class KeyStoreAdaptor(
                 }
             }
             binding.verify.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    keyStoreAdapterCallback.onVerifyButtonClicked(getItem(adapterPosition))
+                }
+            }
+            itemView.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION) {
                     keyStoreAdapterCallback.onVerifyButtonClicked(getItem(adapterPosition))
                 }
@@ -67,15 +67,10 @@ class KeyStoreAdaptor(
                     itemView.context.getString(R.string.text_new_key_store_alias),
                     item.alias
                 )
-
+                verify.setImageResource(
+                    if (item.verified) R.drawable.ic_key_store_verified else R.drawable.ic_key_store_unverified
+                )
             }
-            updateVerifyState(item.verified)
-        }
-
-        private fun updateVerifyState(verified: Boolean) {
-            binding.verify.setImageResource(
-                if (verified) R.drawable.ic_key_store_verified else R.drawable.ic_key_store_unverified
-            )
         }
     }
 

@@ -48,11 +48,27 @@ class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
      */
     fun upsertKeyStore(keyStore: KeyStore) {
         viewModelScope.launch {
+            // 插入或更新数据库中的 KeyStore
             keyStoreDao.upsert(keyStore)
 
-            val currentList = _allKeyStores.value?.toMutableList() ?: mutableListOf()
-            currentList.add(keyStore)
-            _allKeyStores.value = currentList
+            // 获取当前的 KeyStore 列表
+            val currentKeyStores = _allKeyStores.value ?: emptyList()
+
+            // 创建一个新的列表，替换或添加 KeyStore
+            val updatedKeyStores = if (currentKeyStores.any { it.absolutePath == keyStore.absolutePath }) {
+                currentKeyStores.map {
+                    if (keyStore.absolutePath == it.absolutePath) {
+                        keyStore // 替换为更新后的 KeyStore
+                    } else {
+                        it // 保持不变
+                    }
+                }
+            } else {
+                currentKeyStores + keyStore // 添加新 KeyStore
+            }
+
+            // 更新 LiveData 的值
+            _allKeyStores.value = updatedKeyStores
         }
     }
 

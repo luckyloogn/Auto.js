@@ -8,6 +8,7 @@
     <string name="explain_accessibility_permission">软件需要打开\"无障碍服务\"才能运行，请在随后的设置中选择\"Auto.js\"并开启服务。\n您也可以稍后在侧拉菜单中设置。</string>
     <string name="text_cancel">取消</string>
     <string name="text_confirm">确定</string>
+    <string name="text_verify">验证</string>
     <string name="text_path_is_empty">路径为空</string>
     <string name="text_file_not_exists">文件不存在</string>
     <string name="text_no_file_rw_permission">无文件读写权限</string>
@@ -480,7 +481,13 @@
     <string name="error_create_key_store">生成签名密钥失败:</string>
     <string name="text_key_store_unverified">密钥未验证</string>
     <string name="text_key_store_verified">密钥已验证</string>
+    <string name="text_unverified">未验证</string>
+    <string name="text_verified">已验证</string>
     <string name="formatter_str_colon_space_str">%s: %s</string>
+    <string name="text_verify_key_store">验证签名密钥</string>
+    <string name="text_verify_success">验证成功</string>
+    <string name="text_verify_failed">验证失败</string>
+    <string name="text_file_path">文件路径</string>
     <string name="text_use_opencv">使用OpenCV</string>
     <string name="text_use_paddle_ocr">使用PaddleOCR</string>
     <string name="text_use_ml_kit_ocr">使用ML-KitOCR</string>

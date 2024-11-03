@@ -62,7 +62,7 @@
                 tools:src="@drawable/ic_key_store_verified"
                 android:clickable="true"
                 android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_key_store_unverified" />
+                android:contentDescription="@string/text_verify_key_store" />
 
             <ImageView
                 android:id="@+id/delete"
