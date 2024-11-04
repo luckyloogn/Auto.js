@@ -9,15 +9,27 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import java.io.File
 
-class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
-    private var keyStoreDao: KeyStoreDao
+class KeyStoreViewModel(context: Context) : ViewModel() {
+    private val keyStoreRepository: KeyStoreRepository = KeyStoreRepository(context)
 
     private val _allKeyStores = MutableLiveData<List<KeyStore>>()
     val allKeyStores: LiveData<List<KeyStore>> get() = _allKeyStores
 
+    private val _verifiedKeyStores = MutableLiveData<List<KeyStore>>()
+    val verifiedKeyStores: LiveData<List<KeyStore>> get() = _verifiedKeyStores
+
     init {
-        val keyStoreDatabase = KeyStoreDatabase.getDatabase(context)
-        keyStoreDao = keyStoreDatabase.keyStoreDao()
+        updateVerifiedKeyStores()
+    }
+
+    /**
+     * 从数据库更新 verifiedKeyStores 的值。
+     */
+    fun updateVerifiedKeyStores() {
+        viewModelScope.launch {
+            val keyStores = keyStoreRepository.getAllKeyStores()
+            _verifiedKeyStores.value = keyStores
+        }
     }
 
     /**
@@ -31,7 +43,7 @@ class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
     fun updateAllKeyStoresFromFiles(files: Array<File>) {
         viewModelScope.launch {
             val updatedKeyStores = files.map { file ->
-                keyStoreDao.getByAbsolutePath(file.absolutePath) ?: KeyStore(
+                keyStoreRepository.getKeyStoreAbsolutePath(file.absolutePath) ?: KeyStore(
                     absolutePath = file.absolutePath,
                     filename = file.name
                 )
@@ -49,23 +61,24 @@ class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
     fun upsertKeyStore(keyStore: KeyStore) {
         viewModelScope.launch {
             // 插入或更新数据库中的 KeyStore
-            keyStoreDao.upsert(keyStore)
+            keyStoreRepository.upsertKeyStores(keyStore)
 
             // 获取当前的 KeyStore 列表
             val currentKeyStores = _allKeyStores.value ?: emptyList()
 
             // 创建一个新的列表，替换或添加 KeyStore
-            val updatedKeyStores = if (currentKeyStores.any { it.absolutePath == keyStore.absolutePath }) {
-                currentKeyStores.map {
-                    if (keyStore.absolutePath == it.absolutePath) {
-                        keyStore // 替换为更新后的 KeyStore
-                    } else {
-                        it // 保持不变
+            val updatedKeyStores =
+                if (currentKeyStores.any { it.absolutePath == keyStore.absolutePath }) {
+                    currentKeyStores.map {
+                        if (keyStore.absolutePath == it.absolutePath) {
+                            keyStore // 替换为更新后的 KeyStore
+                        } else {
+                            it // 保持不变
+                        }
                     }
+                } else {
+                    currentKeyStores + keyStore // 添加新 KeyStore
                 }
-            } else {
-                currentKeyStores + keyStore // 添加新 KeyStore
-            }
 
             // 更新 LiveData 的值
             _allKeyStores.value = updatedKeyStores
@@ -79,7 +92,7 @@ class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
      */
     fun deleteKeyStore(keyStore: KeyStore) {
         viewModelScope.launch {
-            keyStoreDao.delete(keyStore)
+            keyStoreRepository.deleteKeyStores(keyStore)
 
             val currentKeyStores = _allKeyStores.value ?: emptyList()
             val updatedKeyStores = currentKeyStores.filter { it != keyStore }
@@ -89,7 +102,7 @@ class ManageKeyStoreActivityViewModel(context: Context) : ViewModel() {
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ManageKeyStoreActivityViewModel(context) as T
+            return KeyStoreViewModel(context) as T
         }
     }
 }

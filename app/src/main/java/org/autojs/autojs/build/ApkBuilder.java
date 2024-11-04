@@ -41,6 +41,8 @@ import zhao.arsceditor.ResDecoder.data.ResTable;
 import static org.apache.commons.io.FileUtils.copyFile;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
+import org.autojs.autojs.ui.project.KeyStore;
+
 
 /**
  * Created by Stardust on 2017/10/24.
@@ -78,6 +80,7 @@ public class ApkBuilder {
         Boolean V2SigningEnabled = true;
         Boolean V3SigningEnabled = false;
         Boolean V4SigningEnabled = false;
+        KeyStore keyStore = null;
 
         public static AppConfig fromProjectConfig(String projectDir, ProjectConfig projectConfig) {
             String icon = projectConfig.getIcon();
@@ -226,6 +229,14 @@ public class ApkBuilder {
 
         public void setV4SigningEnabled(Boolean enabled) {
             this.V4SigningEnabled = enabled;
+        }
+
+        public KeyStore getKeyStore() {
+            return this.keyStore;
+        }
+
+        public void setKeyStore(KeyStore keyStore) {
+            this.keyStore = keyStore;
         }
     }
 
@@ -494,7 +505,20 @@ public class ApkBuilder {
         signer.setV2SigningEnabled(mAppConfig.V2SigningEnabled);
         signer.setV3SigningEnabled(mAppConfig.V3SigningEnabled);
         signer.setV4SigningEnabled(mAppConfig.V4SigningEnabled);
-        if(!signer.signRelease(new File(mWorkspacePath + "/default.jks"), "Auto.js", "Auto.js", "Auto.js")) {
+
+        File keyStoreFile = new File(mWorkspacePath + "/default.jks");
+        String password = "Auto.js";
+        String alias = "Auto.js";
+        String aliasPassword = "Auto.js";
+
+        if (mAppConfig.keyStore != null) {
+            keyStoreFile = new File(mAppConfig.keyStore.getAbsolutePath());
+            password = mAppConfig.keyStore.getPassword();
+            alias = mAppConfig.keyStore.getAlias();
+            aliasPassword = mAppConfig.keyStore.getAliasPassword();
+        }
+
+        if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
             throw new RuntimeException("Sign apk failed");
         }
 

@@ -428,6 +428,7 @@
     <string name="text_build_permission_tips">选择打包后所需要使用的权限</string>
     <string name="text_apk_sign_configs">签名配置</string>
     <string name="text_key_store">密钥库</string>
+    <string name="text_default_key_store">默认密钥库</string>
     <string-array name="key_store_spinner_items">
         <item>默认</item>
     </string-array>

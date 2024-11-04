@@ -9,6 +9,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -47,6 +48,7 @@ import java.util.regex.Pattern;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -106,6 +108,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @ViewById(R.id.use_onnx_runtime)
     CheckBox mUseOnnx;
 
+    @ViewById(R.id.select_key_store)
+    AppCompatSpinner mSelectKeyStore;
+
     @ViewById(R.id.signature_scheme)
     AppCompatSpinner mSignatureScheme;
 
@@ -116,6 +121,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
+
+    private KeyStoreViewModel mKeyStoreViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,6 +137,48 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
+
+        // 可用密钥库
+        mKeyStoreViewModel = new ViewModelProvider(this, new KeyStoreViewModel.Factory(getApplicationContext())).get(KeyStoreViewModel.class);
+        prepareVerifiedKeyStoresSpinner();
+        mKeyStoreViewModel.updateVerifiedKeyStores();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mKeyStoreViewModel.updateVerifiedKeyStores();
+    }
+
+    /**
+     * 构建可用密钥库选项列表
+     */
+    private void prepareVerifiedKeyStoresSpinner() {
+        // 添加 默认密钥库
+        // 默认密钥库在ApkBuilder.signWithApkSigner中会从Assets复制到下面的路径：copyInputStreamToFile(GlobalAppContext.get().getAssets().open("keystore/default.jks"), new File(mWorkspacePath + "/default.jks"));
+        String defaultKeyStorePath = getCacheDir().getAbsolutePath() + "/build/default.jks";
+        ArrayList<KeyStore> verifiedKeyStores = new ArrayList<>();
+        verifiedKeyStores.add(new KeyStore(
+                defaultKeyStorePath,
+                getString(R.string.text_default_key_store),
+                "Auto.js",
+                "Auto.js",
+                "Auto.js",
+                true
+        ));
+
+        ArrayAdapter<KeyStore> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, verifiedKeyStores);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSelectKeyStore.setAdapter(adapter);
+
+        mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
+            // 清空现有的选项，但保留第一个元素，即默认密钥库
+            if (verifiedKeyStores.size() > 1) {
+                verifiedKeyStores.subList(1, verifiedKeyStores.size()).clear();
+            }
+            verifiedKeyStores.addAll(keyStores);
+            adapter.notifyDataSetChanged();
+        });
     }
 
     /**
@@ -339,6 +388,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         appConfig.setV2SigningEnabled(signatureScheme.contains("V2"));
         appConfig.setV3SigningEnabled(signatureScheme.contains("V3"));
         appConfig.setV4SigningEnabled(signatureScheme.contains("V4"));
+
+        appConfig.setKeyStore((KeyStore) mSelectKeyStore.getSelectedItem());
 
         return appConfig;
     }

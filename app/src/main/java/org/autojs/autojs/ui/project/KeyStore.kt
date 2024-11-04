@@ -11,9 +11,12 @@ import androidx.room.PrimaryKey
 @Entity
 data class KeyStore(
     @PrimaryKey val absolutePath: String,  // 密钥库绝对路径，主键，唯一标识
-    @ColumnInfo(name = "filename") var filename: String,  // 文件名
-    @ColumnInfo(name = "password") var password: String? = null,  // 密码
-    @ColumnInfo(name = "alias") var alias: String? = null,  // 别名
-    @ColumnInfo(name = "alias_password") var aliasPassword: String? = null,  // 别名密码
-    @ColumnInfo(name = "verified") var verified: Boolean = false  // 验证状态，默认为 false
-)
+    @ColumnInfo(name = "filename") val filename: String = "",  // 文件名
+    @ColumnInfo(name = "password") val password: String = "",  // 密码
+    @ColumnInfo(name = "alias") val alias: String = "",  // 别名
+    @ColumnInfo(name = "alias_password") val aliasPassword: String = "",  // 别名密码
+    @ColumnInfo(name = "verified") val verified: Boolean = false  // 验证状态，默认为 false
+) {
+    // 重写 toString() 方法以便在 UI 组件中使用 KeyStore 对象，但只显示文件名
+    override fun toString(): String = filename
+}

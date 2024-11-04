@@ -28,7 +28,7 @@ class ManageKeyStoreActivity : BaseActivity() {
     private val TAG = "ManageKeyStoreActivity"
     private lateinit var binding: ActivityManageKeyStoreBinding
     private lateinit var keyStoreAdapter: KeyStoreAdaptor
-    private lateinit var viewModel: ManageKeyStoreActivityViewModel
+    private lateinit var keyStoreViewModel: KeyStoreViewModel
 
     companion object {
         fun startActivity(context: Context) {
@@ -75,9 +75,8 @@ class ManageKeyStoreActivity : BaseActivity() {
 
         setToolbarAsBack(getString(R.string.text_manage_key_store))
 
-        viewModel = ViewModelProvider(
-            this, ManageKeyStoreActivityViewModel.Factory(this)
-        )[ManageKeyStoreActivityViewModel::class.java]
+        keyStoreViewModel =
+            ViewModelProvider(this, KeyStoreViewModel.Factory(this))[KeyStoreViewModel::class.java]
 
         binding.fab.setOnClickListener {
             NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
@@ -90,7 +89,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.allKeyStores.observe(this@ManageKeyStoreActivity) {
+        keyStoreViewModel.allKeyStores.observe(this@ManageKeyStoreActivity) {
             keyStoreAdapter.submitList(it.toList())
         }
 
@@ -112,7 +111,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             name.endsWith(".bks") || name.endsWith(".jks")
         } ?: emptyArray()
 
-        viewModel.updateAllKeyStoresFromFiles(filteredFiles)
+        keyStoreViewModel.updateAllKeyStoresFromFiles(filteredFiles)
     }
 
     fun createKeyStore(configs: NewKeyStoreConfigs) {
@@ -150,7 +149,7 @@ class ManageKeyStoreActivity : BaseActivity() {
                 aliasPassword = configs.aliasPassword,
                 verified = true
             )
-            viewModel.upsertKeyStore(newKeyStore)
+            keyStoreViewModel.upsertKeyStore(newKeyStore)
             showToast(R.string.success_create_key_store)
         } catch (e: IOException) {
             showToast(getString(R.string.error_create_key_store) + " " + e.message)
@@ -163,7 +162,7 @@ class ManageKeyStoreActivity : BaseActivity() {
         keyStore.absolutePath.let {
             try {
                 File(it).delete()
-                viewModel.deleteKeyStore(keyStore)
+                keyStoreViewModel.deleteKeyStore(keyStore)
                 showToast(getString(R.string.text_already_delete) + " " + keyStore.filename)
             } catch (e: Exception) {
                 showToast(getString(R.string.text_delete_failed) + ": " + e.message)
@@ -206,7 +205,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             aliasPassword = configs.aliasPassword,
             verified = true
         )
-        viewModel.upsertKeyStore(verifiedKeyStore)
+        keyStoreViewModel.upsertKeyStore(verifiedKeyStore)
         showToast(R.string.text_verify_success)
     }
 
