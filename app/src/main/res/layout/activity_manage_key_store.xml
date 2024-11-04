@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -25,15 +25,22 @@
         android:layout_height="match_parent"
         android:padding="8dp">
 
-        <ScrollView
+        <org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_key_store"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </ScrollView>
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </ScrollView>
+
+        </org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout>
 
         <com.stardust.theme.widget.ThemeColorFloatingActionButton
             android:id="@+id/fab"

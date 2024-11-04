@@ -100,6 +100,17 @@ class KeyStoreViewModel(context: Context) : ViewModel() {
         }
     }
 
+    /**
+     * 删除所有 KeyStore。
+     *
+     */
+    fun deleteAllKeyStores() {
+        viewModelScope.launch {
+            keyStoreRepository.deleteAllKeyStores()
+            _allKeyStores.value = emptyList()
+        }
+    }
+
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return KeyStoreViewModel(context) as T

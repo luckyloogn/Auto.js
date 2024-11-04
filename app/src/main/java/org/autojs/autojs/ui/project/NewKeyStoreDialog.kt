@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.project
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -10,10 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.fragment.app.DialogFragment
 import org.autojs.autojs.R
 import org.autojs.autojs.databinding.DialogNewKeyStoreBinding
@@ -49,15 +45,19 @@ open class NewKeyStoreDialog(
             var valvalidityYears = 25
 
             // 检查文件名是否符合Android命名规格
-            val filenameRegex = "^[a-zA-Z0-9_.-]+$".toRegex()
             when {
                 filename.isEmpty() -> {
                     binding.filename.error = getString(R.string.error_filename_empty)
                     error = true
                 }
 
-                !filenameRegex.matches(filename) -> {
+                !containsSpecialCharacters(filename) -> {
                     binding.filename.error = getString(R.string.error_invalid_filename)
+                    error = true
+                }
+
+                filename.length > 255 -> {
+                    binding.filename.error = getString(R.string.error_filename_too_long)
                     error = true
                 }
 
@@ -128,19 +128,16 @@ open class NewKeyStoreDialog(
             val cityOrLocality = binding.cityOrLocality.text.toString()
             val street = binding.street.text.toString()
 
-            if (firstAndLastName.isEmpty() && organization.isEmpty() && organizationalUnit.isEmpty() && stateOrProvince.isEmpty() && cityOrLocality.isEmpty() && street.isEmpty() && countryCode.isEmpty()) {
-                binding.firstAndLastName.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.organization.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.organizationalUnit.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.countryCode.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.stateOrProvince.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
-                binding.cityOrLocality.error =
-                    getString(R.string.error_all_certificate_issuer_fields_empty)
+            if (firstAndLastName.isEmpty() && organization.isEmpty() &&
+                organizationalUnit.isEmpty() && stateOrProvince.isEmpty() &&
+                cityOrLocality.isEmpty() && street.isEmpty() && countryCode.isEmpty()
+            ) {
+                binding.firstAndLastName.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.organization.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.organizationalUnit.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.countryCode.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.stateOrProvince.error = getString(R.string.error_all_certificate_issuer_fields_empty)
+                binding.cityOrLocality.error = getString(R.string.error_all_certificate_issuer_fields_empty)
                 binding.street.error = getString(R.string.error_all_certificate_issuer_fields_empty)
                 error = true
             } else {
@@ -206,19 +203,19 @@ open class NewKeyStoreDialog(
         }
     }
 
-    private fun showMessage(@StringRes message: Int) {
-        activity?.runOnUiThread {
-            Toast.makeText(context, getString(message), Toast.LENGTH_SHORT).show()
+    private fun containsSpecialCharacters(fileName: String): Boolean {
+        // 定义不允许的字符
+        val invalidCharacters = listOf("\\", "/", ":", "*", "?", "\"", "<", ">", "|")
+
+        // 检查文件名是否包含无效字符
+        for (char in invalidCharacters) {
+            if (fileName.contains(char)) {
+                return false
+            }
         }
-    }
 
-    fun hideKeyboard() {
-        val imm: InputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (imm.isActive) imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS)
+        return true
     }
-
-    fun isShowing() = dialog?.isShowing ?: false
 
     data class NewKeyStoreConfigs(
         val filename: String,

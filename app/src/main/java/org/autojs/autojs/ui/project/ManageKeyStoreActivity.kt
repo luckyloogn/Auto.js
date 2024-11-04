@@ -3,6 +3,8 @@ package org.autojs.autojs.ui.project
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
@@ -22,6 +24,7 @@ import org.autojs.autojs.ui.project.NewKeyStoreDialog.NewKeyStoreConfigs
 import org.autojs.autojs.ui.project.VerifyKeyStoreDialog.VerifyKeyStoreConfigs
 import java.io.File
 import java.io.IOException
+
 
 class ManageKeyStoreActivity : BaseActivity() {
 
@@ -83,10 +86,16 @@ class ManageKeyStoreActivity : BaseActivity() {
         }
 
         keyStoreAdapter = KeyStoreAdaptor(keyStoreAdapterCallback)
-        binding.recyclerViewKeyStore.apply {
+        binding.recyclerView.apply {
             adapter = keyStoreAdapter
             layoutManager = LinearLayoutManager(this@ManageKeyStoreActivity)
             itemAnimator = DefaultItemAnimator()
+        }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            loadKeyStores()
+            binding.recyclerView.postDelayed({
+                binding.swipeRefreshLayout.isRefreshing = false
+            }, 800) // 一段时间后停止下拉刷新动画
         }
 
         keyStoreViewModel.allKeyStores.observe(this@ManageKeyStoreActivity) {
@@ -99,6 +108,27 @@ class ManageKeyStoreActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         loadKeyStores()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_manage_key_store, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_delete_all -> {
+                MaterialDialog.Builder(this@ManageKeyStoreActivity)
+                    .title(getString(R.string.text_are_you_sure_to_delete_all))
+                    .positiveText(R.string.ok).negativeText(R.string.cancel)
+                    .onPositive { _: MaterialDialog, _: DialogAction ->
+                        deleteAllKeyStores()
+                    }.show()
+            }
+
+            else -> {}
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun loadKeyStores() {
@@ -159,15 +189,32 @@ class ManageKeyStoreActivity : BaseActivity() {
     }
 
     fun deleteKeyStore(keyStore: KeyStore) {
-        keyStore.absolutePath.let {
-            try {
-                File(it).delete()
+        val keyStorePath = keyStore.absolutePath
+        val keyStoreFile = File(keyStorePath)
+
+        try {
+            if (keyStoreFile.delete()) {
                 keyStoreViewModel.deleteKeyStore(keyStore)
                 showToast(getString(R.string.text_already_delete) + " " + keyStore.filename)
-            } catch (e: Exception) {
-                showToast(getString(R.string.text_delete_failed) + ": " + e.message)
+            } else {
+                showToast(getString(R.string.text_delete_failed))
             }
+        } catch (e: Exception) {
+            showToast(getString(R.string.text_delete_failed) + ": " + e.message)
         }
+    }
+
+    private fun deleteAllKeyStores() {
+        val path = File(Pref.getKeyStorePath())
+        if (!path.isDirectory) return
+
+        val files = path.listFiles { _, name -> name.endsWith(".bks") || name.endsWith(".jks") }
+        files?.forEach { file ->
+            file.delete()
+        }
+
+        keyStoreViewModel.deleteAllKeyStores()
+        showToast(getString(R.string.text_already_delete_all))
     }
 
     fun verifyKeyStore(

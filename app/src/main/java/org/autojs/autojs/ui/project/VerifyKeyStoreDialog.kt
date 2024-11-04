@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.project
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -10,10 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.fragment.app.DialogFragment
 import org.autojs.autojs.R
 import org.autojs.autojs.databinding.DialogVerifyKeyStoreBinding
@@ -122,20 +118,6 @@ open class VerifyKeyStoreDialog(
             }
         }
     }
-
-    private fun showMessage(@StringRes message: Int) {
-        activity?.runOnUiThread {
-            Toast.makeText(context, getString(message), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun hideKeyboard() {
-        val imm: InputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (imm.isActive) imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS)
-    }
-
-    fun isShowing() = dialog?.isShowing ?: false
 
     data class VerifyKeyStoreConfigs(
         val password: String,

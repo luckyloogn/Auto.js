@@ -53,7 +53,9 @@
     <string name="text_send_shortcut">创建快捷方式</string>
     <string name="text_already_create">已创建</string>
     <string name="text_delete">删除</string>
+    <string name="text_delete_all">删除全部</string>
     <string name="text_already_delete">已删除</string>
+    <string name="text_already_delete_all">已删除全部</string>
     <string name="text_error">错误</string>
     <string name="text_copy_debug_info">复制调试信息</string>
     <string name="text_it_is_the_developer_of_app">这是软件开发者(。・・)ノ</string>
@@ -364,6 +366,7 @@
     <string name="text_execute">执行</string>
     <string name="error_connect_to_remote">连接失败: %s</string>
     <string name="text_are_you_sure_to_delete">确定要删除%s吗</string>
+    <string name="text_are_you_sure_to_delete_all">确定要删除全部吗</string>
     <string name="text_run_on_broadcast">特定事件(广播)触发运行</string>
     <string name="text_search_java_class">搜索Java包/类</string>
     <string name="text_class_or_package_name">类/包名</string>
@@ -470,7 +473,8 @@
     <string name="text_new_key_store_default_validity_years">25</string>
     <string name="text_new_key_store_default_country_code">CN</string>
     <string name="error_filename_empty">文件名不能为空</string>
-    <string name="error_invalid_filename">文件名只能包含字母、数字、下划线或连字符</string>
+    <string name="error_invalid_filename">文件名不能包含下列任何字符: \\ / : * ? &quot; &lt; &gt; |</string>
+    <string name="error_filename_too_long">文件名太长</string>
     <string name="error_password_empty">密码不能为空</string>
     <string name="error_password_min_length">密码至少需要6位字符</string>
     <string name="error_alias_empty">别名不能为空</string>
