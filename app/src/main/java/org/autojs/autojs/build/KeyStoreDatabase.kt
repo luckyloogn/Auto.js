@@ -1,4 +1,4 @@
-package org.autojs.autojs.ui.project
+package org.autojs.autojs.build
 
 import android.content.Context
 import androidx.room.Database

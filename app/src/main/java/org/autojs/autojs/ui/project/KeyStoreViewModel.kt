@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import org.autojs.autojs.build.KeyStore
+import org.autojs.autojs.build.KeyStoreRepository
 import java.io.File
 
 class KeyStoreViewModel(context: Context) : ViewModel() {

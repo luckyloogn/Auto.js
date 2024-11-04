@@ -1,8 +1,6 @@
-package org.autojs.autojs.ui.project
+package org.autojs.autojs.build
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

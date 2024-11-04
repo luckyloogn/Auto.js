@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.R
+import org.autojs.autojs.build.KeyStore
 import org.autojs.autojs.databinding.ItemKeyStoreBinding
 
 class KeyStoreAdaptor(

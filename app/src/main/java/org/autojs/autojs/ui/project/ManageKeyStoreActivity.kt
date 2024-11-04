@@ -18,6 +18,7 @@ import com.mcal.apksigner.utils.DistinguishedNameValues
 import com.mcal.apksigner.utils.KeyStoreHelper
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
+import org.autojs.autojs.build.KeyStore
 import org.autojs.autojs.databinding.ActivityManageKeyStoreBinding
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.project.NewKeyStoreDialog.NewKeyStoreConfigs

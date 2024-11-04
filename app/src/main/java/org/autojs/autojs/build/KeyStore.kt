@@ -1,4 +1,4 @@
-package org.autojs.autojs.ui.project
+package org.autojs.autojs.build
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

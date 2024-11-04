@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
 import org.autojs.autojs.R
+import org.autojs.autojs.build.KeyStore
 import org.autojs.autojs.databinding.DialogVerifyKeyStoreBinding
 
 open class VerifyKeyStoreDialog(

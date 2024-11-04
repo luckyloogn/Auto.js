@@ -41,8 +41,6 @@ import zhao.arsceditor.ResDecoder.data.ResTable;
 import static org.apache.commons.io.FileUtils.copyFile;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
-import org.autojs.autojs.ui.project.KeyStore;
-
 
 /**
  * Created by Stardust on 2017/10/24.
