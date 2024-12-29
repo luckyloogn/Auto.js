@@ -30,7 +30,18 @@ class KeyStoreViewModel(context: Context) : ViewModel() {
     fun updateVerifiedKeyStores() {
         viewModelScope.launch {
             val keyStores = keyStoreRepository.getAllKeyStores()
-            _verifiedKeyStores.value = keyStores
+            val validKeyStores = mutableListOf<KeyStore>()
+
+            keyStores.forEach { keyStore ->
+                val file = File(keyStore.absolutePath)
+                if (file.exists()) {
+                    validKeyStores.add(keyStore)
+                } else {
+                    keyStoreRepository.deleteKeyStores(keyStore)
+                }
+            }
+
+            _verifiedKeyStores.value = validKeyStores
         }
     }
 
