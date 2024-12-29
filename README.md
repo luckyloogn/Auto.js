@@ -100,8 +100,8 @@
   ```
 - Windows CMD : 
   ```
-  gradlew.bat downloadAndExtractNcnnArchives 
-  gradlew.bat downloadAndExtractArchives
+  gradlew downloadAndExtractNcnnArchives 
+  gradlew downloadAndExtractArchives
   ```
 需要从Github上下载，网络问题可能比较慢，可以自行下载依赖的zip包，再解压到对应的目录：
 - ncnn预编译包
@@ -120,6 +120,8 @@
                         └── x86
                         └── x86_64
     ```
+  - 另外，需要将 `ncnn-20240410-android-vulkan.zip` 改名为 `2b3arvvhfnh61899ut9bs3115r.zip`，然后复制到 `autojs-aar/yolov8ncnn/cache/` 下（没有 `cache` 目录就自行创建）
+
 - OpenCV4.8.0 (需要解压到2个地方)
   - 下载地址：https://github.com/opencv/opencv/releases/download/4.8.0/opencv-4.8.0-android-sdk.zip
   - 解压地址1：`autojs-aar/yolov8ncnn/src/main/jni/`
@@ -148,6 +150,7 @@
                 └── LICENSE
                 └── README.android
     ```
+  - 另外，需要将 `opencv-4.8.0-android-sdk.zip` 改名为 `1kisn9l1a5os7gj1f4if3tk7s6.zip`，然后复制到 `autojs-aar/yolov8ncnn/cache/` 和 `autojs-aar/paddleocr/cache/` 下（没有 `cache` 目录就自行创建）
 
 ### 设置签名文件
 1. 先使用 Android Studio 创建签名文件，具体看[**这个**](https://developer.android.com/studio/publish/app-signing?hl=zh-cn#generate-key)。
@@ -204,6 +207,8 @@
   - x86: `./gradlew assembleX86Release`
   - x86_64: `./gradlew assembleX86_64Release`
   - universal: `./gradlew assembleUniversalRelease`
+
+注意：Windows CMD 需要将 `./gradlew` 改为 `gradlew`
 
 编译出来的apk会复制到 `common/debug` 或 `common/release` 下
 
